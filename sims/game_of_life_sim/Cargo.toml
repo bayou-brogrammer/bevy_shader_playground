@@ -1,0 +1,59 @@
+[package]
+authors = ["Jacob LeCoq <lecoqjacob@gmail.com>"]
+edition = "2021"
+name    = "game_of_life_sim"
+publish = false
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+codegen-units = 1
+lto           = true
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto      = "thin"
+
+[features]
+dev = ["bevy/bevy_dylib"]
+
+# Bevy defaults minus audio and some other not needed things
+# see https://github.com/bevyengine/bevy/blob/main/Cargo.toml#L31-L54
+default = [
+    "bevy/animation",
+    "bevy/bevy_asset",
+    "bevy/bevy_scene",
+    "bevy/bevy_winit",
+    "bevy/bevy_core_pipeline",
+    "bevy/bevy_pbr",
+    "bevy/bevy_gltf",
+    "bevy/bevy_render",
+    "bevy/bevy_sprite",
+    "bevy/bevy_text",
+    "bevy/bevy_ui",
+    "bevy/png",
+    "bevy/hdr",
+    "bevy/zstd",
+    "bevy/x11",
+    "bevy/ktx2",
+    "bevy/filesystem_watcher",
+    "bevy/tonemapping_luts",
+]
+
+[dependencies]
+bevy   = { version = "0.10", default-features = false }
+encase = { version = "0.5", features = ["glam"] }
+rand   = { version = "0.8.3" }
+
+[build-dependencies]
+cfg_aliases    = "0.1"
+embed-resource = "2"

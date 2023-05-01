@@ -1,0 +1,3 @@
+[workspace]
+members  = ["sims/*"]
+resolver = "2"
