@@ -1,6 +1,9 @@
-use bevy::{prelude::*, render::render_resource::*};
+use bevy::{
+    prelude::*,
+    render::{extract_resource::ExtractResource, render_resource::*},
+};
 
-#[derive(Resource, Clone, Deref)]
+#[derive(Resource, Clone, Deref, ExtractResource)]
 pub struct GameOfLifeImage(pub Handle<Image>);
 
 pub fn create_image(width: u32, height: u32) -> Image {
