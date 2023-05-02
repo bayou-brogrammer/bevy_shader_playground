@@ -1319,7 +1319,9 @@ dependencies = [
  "cfg_aliases",
  "embed-resource",
  "encase",
+ "image",
  "rand",
+ "winit",
 ]
 
 [[package]]
