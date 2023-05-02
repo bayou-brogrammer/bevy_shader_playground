@@ -156,7 +156,7 @@ impl render_graph::Node for GameOfLifeNode {
 
         // select the pipeline based on the current state
         match self.state {
-            GameOfLifeState::Update | GameOfLifeState::Loading => {}
+            GameOfLifeState::Loading => {}
             GameOfLifeState::Init => {
                 let init_pipeline = pipeline_cache
                     .get_compute_pipeline(pipeline.init_pipeline)
@@ -167,17 +167,18 @@ impl render_graph::Node for GameOfLifeNode {
                     SIM_SIZE.1 / WORKGROUP_SIZE,
                     1,
                 );
-            } // GameOfLifeState::Update => {
-              //     let update_pipeline = pipeline_cache
-              //         .get_compute_pipeline(pipeline.update_pipeline)
-              //         .unwrap();
-              //     pass.set_pipeline(update_pipeline);
-              //     pass.dispatch_workgroups(
-              //         SIM_SIZE.0 / WORKGROUP_SIZE,
-              //         SIM_SIZE.1 / WORKGROUP_SIZE,
-              //         1,
-              //     );
-              // }
+            }
+            GameOfLifeState::Update => {
+                let update_pipeline = pipeline_cache
+                    .get_compute_pipeline(pipeline.update_pipeline)
+                    .unwrap();
+                pass.set_pipeline(update_pipeline);
+                pass.dispatch_workgroups(
+                    SIM_SIZE.0 / WORKGROUP_SIZE,
+                    SIM_SIZE.1 / WORKGROUP_SIZE,
+                    1,
+                );
+            }
         }
 
         Ok(())

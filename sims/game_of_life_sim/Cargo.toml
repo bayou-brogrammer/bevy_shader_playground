@@ -54,6 +54,10 @@ bevy   = { version = "0.10", default-features = false }
 encase = { version = "0.5", features = ["glam"] }
 rand   = { version = "0.8.3" }
 
+# keep the following in sync with Bevy's dependencies
+image = { version = "0.24", default-features = false }
+winit = { version = "0.28", default-features = false }
+
 [build-dependencies]
 cfg_aliases    = "0.1"
 embed-resource = "2"

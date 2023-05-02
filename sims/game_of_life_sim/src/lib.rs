@@ -1,27 +1,25 @@
 mod image;
 mod pipeline;
 
-use bevy::diagnostic::Diagnostics;
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy::render::extract_resource::ExtractResourcePlugin;
 use bevy::render::render_graph::RenderGraph;
-use bevy::{app::App, render::*, window::PrimaryWindow};
-use image::GameOfLifeImage;
-use pipeline::GameOfLifeNode;
-use pipeline::GameOfLifePipeline;
+use bevy::{app::App, render::*};
+
+use self::image::GameOfLifeImage;
+use pipeline::{GameOfLifeNode, GameOfLifePipeline};
 
 const SIM_SIZE: (u32, u32) = (1280, 720);
 const WORKGROUP_SIZE: u32 = 8;
+
 pub struct ShaderPlaygroundPlugin;
 impl Plugin for ShaderPlaygroundPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(FrameTimeDiagnosticsPlugin::default())
+        app
             // Extract the game of life image resource from the main world into the render world
             // for operation on by the compute shader and display on the sprite.
             .add_plugin(ExtractResourcePlugin::<GameOfLifeImage>::default())
-            .add_startup_system(setup)
-            .add_system(window_fps);
+            .add_startup_system(setup);
 
         let render_app = app.sub_app_mut(RenderApp);
         render_app
@@ -34,16 +32,6 @@ impl Plugin for ShaderPlaygroundPlugin {
             "game_of_life",
             bevy::render::main_graph::node::CAMERA_DRIVER,
         );
-    }
-}
-
-fn window_fps(diagnostics: Res<Diagnostics>, mut windows: Query<&mut Window, With<PrimaryWindow>>) {
-    if let Ok(mut window) = windows.get_single_mut() {
-        if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
-            if let Some(fps_smoothed) = fps_diagnostic.smoothed() {
-                window.title = format!("{fps_smoothed:.2}");
-            }
-        }
     }
 }
 
