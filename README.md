@@ -10,6 +10,9 @@ compute shaders using their game of life example. I further expand on the exampl
 - Camera Controller
 - Wrapping Simulation
 - Drawing on the simulation
+- Storage / Uniform Buffers
+- Heatmap for visual effects :D
+- Seperate color pipeline to distinquish between compute shaders
 
 ## License
 
