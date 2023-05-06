@@ -303,4 +303,4 @@ render_app.init_resource::<GameOfLifePipeline>();
 
 Running the example now should produce the same screen, but still no errors. We are getting closer to actually doing something. More in part 2.
 
-Code can be found on github: [Part 1](https://github.com/lecoqjacob/bevy_shader_playground/blob/5b841c3ac3f2c08e24ed8b2d47e9996eee0bfda1/sims/game_of_life_sim/src/main.rs)
+Code can be found on github: [Part 1](https://github.com/lecoqjacob/bevy_shader_playground/tree/explore_part1/sims/game_of_life_sim/src)

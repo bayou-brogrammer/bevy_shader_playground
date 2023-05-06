@@ -154,4 +154,4 @@ Running the app should now show the cells moving around!!! How cool!
 
 ![gol_running](images/gol_running.gif)
 
-Code can be found on github: [Part 3](https://github.com/lecoqjacob/bevy_shader_playground/blob/fb19ddc592691e4e89582a0954f7963eea9300de/sims/game_of_life_sim/src/lib.rs)
+Code can be found on github: [Part 3](https://github.com/lecoqjacob/bevy_shader_playground/tree/explore_part3/sims/game_of_life_sim/src)
