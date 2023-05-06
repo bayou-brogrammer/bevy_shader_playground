@@ -9,3 +9,4 @@
   - [Diving deeper into shaders](./bevy_gol_example/part_2.md)
   - [Making cells dance](./bevy_gol_example/part_3.md)
   - [Paint like Picaso](./bevy_gol_example/part_4.md)
+  - [Buffers and UI, Oh My!](./bevy_gol_example/part_5.md)

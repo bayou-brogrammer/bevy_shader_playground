@@ -257,7 +257,7 @@ The important part is the entry_point. This is the name of the function in the s
 
 Lets quickly setup our shader and then we can move onto the actual compute shader.
 
-```wgsl
+```glsl
 // assets/game_of_life.wgsl
 
 @group(0) @binding(0)

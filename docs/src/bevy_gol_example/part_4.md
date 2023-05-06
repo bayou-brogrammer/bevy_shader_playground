@@ -150,7 +150,7 @@ app
 A simple camera controller. We generate a move delta based on the pressed keys and then using bevy's builtin time resource, manipulate the
 camera's position for buttery smooth movement. Adjust the movement constant to your liking. The zoom just listens for scroll events and adjusts
 the orthographic projection's scale. The `MouseScrollUnit::Pixel` case is taken from an online example I found. I don't know what triggers a
-`MouseScrollUnit::Pixel`, but I have only seen `Line` units so far, but better safe than sorry! 
+`MouseScrollUnit::Pixel`, but I have only seen `Line` units so far, but better safe than sorry!
 
 To better see that our camera works well, you can replace the `ClearColor(Color::BLACK)` with `ClearColor(Color::WHITE)`.
 You should now be able to pan aroundthe simulation and also zoom!
@@ -168,18 +168,18 @@ We need a resource to hold our mouse position, previous mouse position, and if o
 pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<InputState>();
+        app.init_resource::<AutomataParams>();
     }
 }
 
 #[derive(Default, Resource, ExtractResource, Clone)]
-pub struct InputState {
+pub struct AutomataParams {
     mouse_pos: Vec2,
     prev_mouse_pos: Vec2,
     left_button_down: bool,
 }
 
-impl InputState {
+impl AutomataParams {
     pub fn mouse_canvas_pos(&self) -> Vec2 {
         self.mouse_pos
     }
@@ -195,7 +195,7 @@ impl InputState {
 
 pub fn update_input_state(
     window_query: Query<&Window>,
-    mut input_state: ResMut<InputState>,
+    mut params: ResMut<AutomataParams>,
     camera_q: Query<(&Camera, &GlobalTransform)>,
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
 ) {
@@ -206,7 +206,7 @@ pub fn update_input_state(
     // Determine button state
     for event in mouse_button_input_events.iter() {
         if event.button == MouseButton::Left {
-            input_state.left_button_down = event.state == ButtonState::Pressed;
+            params.left_button_down = event.state == ButtonState::Pressed;
         }
     }
     ...
@@ -247,15 +247,26 @@ if let Some(world_position) = primary_window
     .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
     .map(|ray| ray.origin.truncate())
 {
-    input_state.prev_mouse_pos = input_state.mouse_pos; // NEW
-    input_state.mouse_pos =
+    params.prev_mouse_pos = params.mouse_pos; // NEW
+    params.mouse_pos =
         crate::utils::world_pos_to_canvas_pos(world_position * Vec2::new(1.0, -1.0)); // NEW
 }
 ```
 
 `world_position * Vec2::new(1.0, -1.0)` is just flipping the y axis since images have y going down and wgpu has y going up.
 
-Add the input plugin to the `ShaderPlaygroundPlugin`.
+Add the input plugin to the `ShaderPlaygroundPlugin` along with the `ExtractResourcePlugin`
+
+```rust
+...
+.add_plugin(ExtractResourcePlugin::<GameOfLifeImage>::default())
+.add_plugin(ExtractResourcePlugin::<AutomataParams>::default())
+.add_plugin(camera::CameraPlugin)
+.add_plugin(input::InputPlugin)
+.add_plugin(pipeline::PipelinesPlugin)
+.add_plugin(ui::UIPlugin)
+.add_startup_system(setup);
+```
 
 ## Draw Pipeline
 
@@ -426,9 +437,9 @@ impl render_graph::Node for AutomataDrawNode {
         render_context: &mut RenderContext,
         world: &World,
     ) -> Result<(), render_graph::NodeRunError> {
-        let input_state = &world.resource::<InputState>();
+        let params = &world.resource::<AutomataParams>();
 
-        if input_state.is_drawing() {
+        if params.is_drawing() {
             let texture_bind_group = &world.resource::<AutomataTextureBindGroup>().0;
             let draw_bind_group = &world.resource::<AutomataDrawBindGroup>().0;
             let pipeline_cache = world.resource::<PipelineCache>();
@@ -449,8 +460,8 @@ impl render_graph::Node for AutomataDrawNode {
                         .unwrap();
 
                     let pc = AutomataPushConstants::new(
-                        input_state.mouse_canvas_pos(),
-                        input_state.prev_mouse_canvas_pos(),
+                        params.mouse_canvas_pos(),
+                        params.prev_mouse_canvas_pos(),
                         10.0,
                     );
 

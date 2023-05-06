@@ -50,9 +50,13 @@ default = [
 ]
 
 [dependencies]
-bevy     = { version = "0.10", default-features = false }
-bytemuck = "1"
-encase   = { version = "0.5", features = ["glam"] }
+bevy           = { version = "0.10", default-features = false }
+bevy_egui      = "0.20"
+bevy_fn_plugin = { git = "https://github.com/xion/bevy_fn_plugin" }
+
+bytemuck    = "1"
+encase      = { version = "0.5", features = ["glam"] }
+parking_lot = "0.12"
 
 # keep the following in sync with Bevy's dependencies
 image = { version = "0.24", default-features = false }
