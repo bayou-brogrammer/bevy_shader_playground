@@ -34,7 +34,9 @@ fn init(@builtin(global_invocation_id) invocation_id: vec3<u32>, @builtin(num_wo
 
 
 fn is_alive(location: vec2<i32>, offset_x: i32, offset_y: i32) -> u32 {
-    let value: vec4<f32> = textureLoad(texture, location + vec2<i32>(offset_x, offset_y));
+    let size = vec2<i32>(textureDimensions(texture));
+    var loc = ((location + vec2<i32>(offset_x, offset_y)) + size) % size;
+    let value: vec4<f32> = textureLoad(texture, loc);
     return u32(value.x);
 }
 

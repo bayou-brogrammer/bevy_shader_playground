@@ -1,0 +1,37 @@
+[book]
+authors      = ["Jacob LeCoq"]
+language     = "en"
+multilingual = false
+src          = "src"
+title        = "Bevy Shader Playground"
+
+[output.html]
+# default-theme        = "dark"
+edit-url-template  = "https://github.com/lecoqjacob/bevy_shader_playground/edit/main/docs/{path}"
+git-repository-url = "https://github.com/lecoqjacob/bevy_shader_playground/tree/main/docs"
+mathjax-support    = true
+# preferred-dark-theme = "ayu"
+
+[output.html.playground]
+line-numbers = true
+runnable     = false
+
+[output.html.search]
+boost-hierarchy     = 2
+boost-paragraph     = 1
+boost-title         = 2
+expand              = true
+heading-split-level = 2
+limit-results       = 20
+use-boolean-and     = true
+
+[output.html.fold]
+enable = false # whether or not to enable section folding
+level  = 0     # the depth to start folding
+
+[preprocessor.index]
+
+[preprocessor.links]
+
+# Default options, load a TOML context file from ./src/context.toml
+[preprocessor.tera]

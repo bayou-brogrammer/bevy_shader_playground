@@ -1,8 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-    <!-- ToDo use your own keys for Name and Manufacturer, as well as a new UUID for UpgradeCode -->
     <Package
-        Name="BevyGame"
-        Manufacturer="My Name"
+        Name="GameOfLifeSim"
+        Manufacturer="Jacob LeCoq"
         UpgradeCode="132bb59d-de4f-4893-a535-93dfd0597731"
         Version="0.1.0"
 
@@ -35,7 +34,7 @@
         <!-- Installs the actual files -->
         <ComponentGroup Id="MainComponent" Directory="INSTALLFOLDER">
             <Component>
-                <File Id="Executable" Source="..\..\..\target\release\bevy_game.exe" Vital="true" />  <!-- ToDo this should point to your executable -->
+                <File Id="Executable" Source="..\..\..\target\release\game_of_life_sim.exe" Vital="true" />
             </Component>
         </ComponentGroup>
 

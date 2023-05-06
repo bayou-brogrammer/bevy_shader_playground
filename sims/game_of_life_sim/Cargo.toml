@@ -50,9 +50,9 @@ default = [
 ]
 
 [dependencies]
-bevy   = { version = "0.10", default-features = false }
-encase = { version = "0.5", features = ["glam"] }
-rand   = { version = "0.8.3" }
+bevy     = { version = "0.10", default-features = false }
+bytemuck = "1"
+encase   = { version = "0.5", features = ["glam"] }
 
 # keep the following in sync with Bevy's dependencies
 image = { version = "0.24", default-features = false }

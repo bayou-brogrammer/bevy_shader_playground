@@ -1,0 +1,7 @@
+{% macro copyright() %} 
+---
+
+Copyright (C) 2023, Jacob LeCoq.
+
+---
+{% endmacro copyright %}
