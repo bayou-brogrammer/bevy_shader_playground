@@ -19,7 +19,7 @@ impl Plugin for AutomataDrawPipelinePlugin {
     }
 }
 
-// ================================== Contants ================================== //
+// ================================== Constants ================================== //
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]

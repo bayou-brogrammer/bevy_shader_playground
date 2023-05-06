@@ -1,6 +1,6 @@
 # Introduction
 
-Bevy shader playground is a playground to explore and mess with shaders using [Bevy]. I recently found myself facinated by
+Bevy shader playground is a playground to explore and mess with shaders using [Bevy]. I recently found myself fascinated by
 shaders and wanted to learn more about them. I started with the great [Learn Wgpu] tutorial and then found a really neat
 tutorial by [hakolao](https://github.com/hakolao) which explores compute shaders with [Bevy]
 using [Vulkano]. If you are interested, this is the tutorial [compute_shader_tutorial].

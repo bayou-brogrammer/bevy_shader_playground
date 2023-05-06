@@ -4,7 +4,7 @@ I promised some additions to the original example provided so lets start with th
 I just want to be able to pan around the simulation and zoom in a bit. I am going to run a cleanup and refactor for readability and
 cleanliness.
 
-- Create three new files, `camera.rs`, `input.rs`, and `utils.rs`, along with the a foldr `pipeline`. It is important the pipeline folder is named exactly
+- Create three new files, `camera.rs`, `input.rs`, and `utils.rs`, along with the a folder `pipeline`. It is important the pipeline folder is named exactly
 as the `pipeline.rs` file as I am not using `mod.rs` files.
 - Move the function `create_image` into our utils folder and delete the image file.
 - Inside `pipeline` folder create a `automata.rs` file and move all the pipeline code from our past
@@ -153,7 +153,7 @@ the orthographic projection's scale. The `MouseScrollUnit::Pixel` case is taken 
 `MouseScrollUnit::Pixel`, but I have only seen `Line` units so far, but better safe than sorry! 
 
 To better see that our camera works well, you can replace the `ClearColor(Color::BLACK)` with `ClearColor(Color::WHITE)`.
-You should now be able to pan aroundthe simulation and also zoom!
+You should now be able to pan around the simulation and also zoom!
 
 ![camera](images/gol_camera.gif)
 
@@ -259,7 +259,7 @@ impl Plugin for AutomataDrawPipelinePlugin {
     }
 }
 
-// ================================== Contants ================================== //
+// ================================== Constants ================================== //
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -601,7 +601,7 @@ Running the example you should be able to draw on the simulation with your mouse
 
 ## Bonus
 
-One thing you might notice is our simulation doesnt wrap between the edges. We can fix this by maniupulating our `game_of_life.wgsl` slightly.
+One thing you might notice is our simulation doesn't wrap between the edges. We can fix this by manipulating our `game_of_life.wgsl` slightly.
 In the `is_alive` function we can add the following:
 
 ```glsl

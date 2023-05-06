@@ -97,7 +97,7 @@ This function takes in a location, and an offset. We store all our data within t
 and black for dead). `textureLoad` loads the color at the given location. We know a cell is alive if the color returned is red, which is a value of 1.0 a `x`
 
 Now that we have a way to tell if a cell is alive, we can move onto counting the neighbors. We need to check the 8 cells surrounding the current cell.
-We can acheive this using a simple nested for loop. Here is what I came up with:
+We can achieve this using a simple nested for loop. Here is what I came up with:
 
 ```glsl
 fn count_neighbors_simple(location: vec2<i32>) -> u32 {

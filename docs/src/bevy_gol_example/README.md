@@ -1,6 +1,6 @@
 # Bevy Game of Life Example
 
-This is a mini-tutorial series where I explore how bevy setups up compute shaders using the infamous game of life example. I furthur
+This is a mini-tutorial series where I explore how bevy setups up compute shaders using the infamous game of life example. I further
 expand on the example by adding some new featues:
 
 - Camera Controller

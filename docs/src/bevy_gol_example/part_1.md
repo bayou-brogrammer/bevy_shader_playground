@@ -82,7 +82,7 @@ fn window_fps(diagnostics: Res<Diagnostics>, mut windows: Query<&mut Window, Wit
 
 Pretty simple setup. Just added a simple fps system to print the FPS at the top of the window. We need to setup our canvas for our simulation.
 We will just use a simple image constrained to our `SIM_SIZE` variable. You can organize your code how you feel, but I will be breaking out the code
-from the original example into seperate files for readability.
+from the original example into separate files for readability.
 
 ```rust
 // image.rs

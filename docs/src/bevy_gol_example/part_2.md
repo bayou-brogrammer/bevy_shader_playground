@@ -43,7 +43,7 @@ let bind_group = render_device.create_bind_group(&BindGroupDescriptor {
 commands.insert_resource(GameOfLifeImageBindGroup(bind_group));
 ```
 
-Well this looks really familar! It is an exact replica of the bind_group_layout we created earlier. The only difference is that we are now adding
+Well this looks really familiar! It is an exact replica of the bind_group_layout we created earlier. The only difference is that we are now adding
 the actual resources that the layout expects. In this case we are adding the texture view of our canvas image. Lets add the system to our render app.
 
 ```rust
@@ -80,7 +80,7 @@ this is the docstring attached to the `RenderGraph` resource:
 > `Slots` describe the render resources created or used by the nodes.
 > Additionally a render graph can contain multiple sub graphs, which are run by the corresponding nodes. Every render graph can have its own optional input node.
 
-Essentially we setup a graph to tell the render world how to run our pipelines. We only have a single pipeline currnetly, so we will only need a single node.
+Essentially we setup a graph to tell the render world how to run our pipelines. We only have a single pipeline currently, so we will only need a single node.
 
 Our node will have a state for processing which stage the shader is currently in: `Loading`, `Init`, `Update`. Back in `pipeline.rs` lets add our node:
 
@@ -214,7 +214,7 @@ fn run(
 
 We have to pull 3 resources from the world: `GameOfLifeImageBindGroup`, `PipelineCache`, and `GameOfLifePipeline`. We are already familiar
 with the pipeline and pipeline cache, but the new resource `GameOfLifeImageBindGroup` is a `BindGroup` that we queue each frame to be used by the shader.
-Now we beging the `ComputePass`.
+Now we begin the `ComputePass`.
 
 ```rust
 ...
