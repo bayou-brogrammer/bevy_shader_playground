@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
+use bevy::window::{PrimaryWindow, WindowResolution};
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use game_of_life_sim::ShaderPlaygroundPlugin;
@@ -11,18 +11,19 @@ use winit::window::Icon;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::BLACK))
+        .insert_resource(ClearColor(Color::WHITE))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
+                resolution: WindowResolution::new(1280., 720.),
                 canvas: Some("#shader_playground".to_owned()),
                 title: "Shader Playground".to_string(),
-                present_mode: bevy::window::PresentMode::AutoNoVsync, // unthrottled FPS
+                // present_mode: bevy::window::PresentMode::AutoNoVsync, // unthrottled FPS
                 ..default()
             }),
             ..default()
         }))
         .add_plugin(ShaderPlaygroundPlugin)
-        .add_startup_system(set_window_icon)
+        .add_system(set_window_icon.on_startup())
         .run();
 }
 
