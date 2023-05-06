@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::prelude::*;
-use bevy::window::{PrimaryWindow, WindowResolution};
+use bevy::window::{close_on_esc, PrimaryWindow, WindowResolution};
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use game_of_life_sim::ShaderPlaygroundPlugin;
@@ -24,6 +24,7 @@ fn main() {
         }))
         .add_plugin(ShaderPlaygroundPlugin)
         .add_system(set_window_icon.on_startup())
+        .add_system(close_on_esc)
         .run();
 }
 

@@ -150,7 +150,7 @@ app
 A simple camera controller. We generate a move delta based on the pressed keys and then using bevy's builtin time resource, manipulate the
 camera's position for buttery smooth movement. Adjust the movement constant to your liking. The zoom just listens for scroll events and adjusts
 the orthographic projection's scale. The `MouseScrollUnit::Pixel` case is taken from an online example I found. I don't know what triggers a
-`MouseScrollUnit::Pixel`, but I have only seen `Line` units so far, but better safe than sorry! 
+`MouseScrollUnit::Pixel`, but I have only seen `Line` units so far, but better safe than sorry!
 
 To better see that our camera works well, you can replace the `ClearColor(Color::BLACK)` with `ClearColor(Color::WHITE)`.
 You should now be able to pan around the simulation and also zoom!
@@ -233,15 +233,26 @@ if let Some(world_position) = primary_window
     .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
     .map(|ray| ray.origin.truncate())
 {
-    input_state.prev_mouse_pos = input_state.mouse_pos; // NEW
-    input_state.mouse_pos =
+    params.prev_mouse_pos = params.mouse_pos; // NEW
+    params.mouse_pos =
         crate::utils::world_pos_to_canvas_pos(world_position * Vec2::new(1.0, -1.0)); // NEW
 }
 ```
 
 `world_position * Vec2::new(1.0, -1.0)` is just flipping the y axis since images have y going down and wgpu has y going up.
 
-Add the input plugin to the `ShaderPlaygroundPlugin`.
+Add the input plugin to the `ShaderPlaygroundPlugin` along with the `ExtractResourcePlugin`
+
+```rust
+...
+.add_plugin(ExtractResourcePlugin::<GameOfLifeImage>::default())
+.add_plugin(ExtractResourcePlugin::<AutomataParams>::default())
+.add_plugin(camera::CameraPlugin)
+.add_plugin(input::InputPlugin)
+.add_plugin(pipeline::PipelinesPlugin)
+.add_plugin(ui::UIPlugin)
+.add_startup_system(setup);
+```
 
 ## Draw Pipeline
 
