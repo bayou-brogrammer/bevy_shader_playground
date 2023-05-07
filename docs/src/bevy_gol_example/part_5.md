@@ -100,7 +100,6 @@ I am adding a couple of helper methods just to make things easier and reduce the
 /// System to generate user interface with egui
 pub fn user_interface(
     mut contexts: EguiContexts,
-    diagnostics: Res<Diagnostics>,
     mut params: ResMut<AutomataParams>,
 ) {
     egui::Window::new("Automata")
@@ -111,12 +110,6 @@ pub fn user_interface(
 
             heading(ui, "Info");
             ui.add_space(SPACING);
-
-            if let Some(diag) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
-                if let Some(avg) = diag.average() {
-                    sized_text(ui, format!("FPS: {:.2}", avg));
-                }
-            }
 
             sized_text(ui, format!("Grid size: ({},{})", SIM_SIZE.0, SIM_SIZE.1));
 
@@ -141,7 +134,7 @@ pub fn user_interface(
 
 ```
 
-Our `Info` section will show the FPS, the size of our grid, and if our simulation is currently running. The `Settings` section will
+Our `Info` section will show the size of our grid, and if our simulation is currently running. The `Settings` section will
 allow us to change the brush size and toggle between a square brush or circular brush.
 
 Add the plugin to our main plugin, and run the application. This is how it looks:
