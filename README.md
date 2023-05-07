@@ -14,6 +14,12 @@ compute shaders using their game of life example. I further expand on the exampl
 - Heatmap for visual effects :D
 - Seperate color pipeline to distinquish between compute shaders
 
+## Bevy Sand
+
+![Bevy Sand](docs/src/bevy_sand/images/showcase.gif)
+
+This dives deeper into Cellular Automata using rulesets to produce a falling-sand game.
+
 ## License
 
 Licensed under either of

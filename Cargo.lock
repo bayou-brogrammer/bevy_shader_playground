@@ -484,7 +484,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c086ebdc1f5522787d63772943277cc74a279445fb65db4d58c2c5330654648e"
 dependencies = [
  "bevy_macro_utils",
- "encase_derive_impl",
+ "encase_derive_impl 0.5.0",
 ]
 
 [[package]]
@@ -625,7 +625,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da6a1109d06fe947990db032e719e162414cf9bf7a478dcc52742f1c7136c42a"
 dependencies = [
- "glam",
+ "glam 0.23.0",
  "serde",
 ]
 
@@ -635,7 +635,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39106bc2ee21fce9496d2e15e0ba7925dff63e3eae10f7c1fc0094b56ad9f2bb"
 dependencies = [
- "glam",
+ "glam 0.23.0",
 ]
 
 [[package]]
@@ -678,7 +678,7 @@ dependencies = [
  "bevy_utils",
  "downcast-rs",
  "erased-serde",
- "glam",
+ "glam 0.23.0",
  "once_cell",
  "parking_lot",
  "serde",
@@ -728,7 +728,7 @@ dependencies = [
  "bitflags",
  "codespan-reporting",
  "downcast-rs",
- "encase",
+ "encase 0.5.0",
  "futures-lite",
  "hexasphere",
  "image",
@@ -756,6 +756,20 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "bevy_sand"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_egui",
+ "bevy_fn_plugin",
+ "bytemuck",
+ "cfg_aliases",
+ "embed-resource",
+ "encase 0.6.0",
+ "parking_lot",
 ]
 
 [[package]]
@@ -1308,8 +1322,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6591f13a63571c4821802eb5b10fd1155b1290bce87086440003841c8c3909b"
 dependencies = [
  "const_panic",
- "encase_derive",
- "glam",
+ "encase_derive 0.5.0",
+ "glam 0.23.0",
+ "thiserror",
+]
+
+[[package]]
+name = "encase"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76ca07b3a7863d1bc1ddea8647d67394a0236fc5582035a343c4ef3a962ea62e"
+dependencies = [
+ "const_panic",
+ "encase_derive 0.6.0",
+ "glam 0.24.0",
  "thiserror",
 ]
 
@@ -1319,7 +1345,16 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4f1da6deed1f8b6f5909616ffa695f63a5de54d6a0f084fa715c70c8ed3abac9"
 dependencies = [
- "encase_derive_impl",
+ "encase_derive_impl 0.5.0",
+]
+
+[[package]]
+name = "encase_derive"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54141cb8a5d4ed9308fec79fb1cb9cd272fcd38aa8d1b1165bef654b18671161"
+dependencies = [
+ "encase_derive_impl 0.6.0",
 ]
 
 [[package]]
@@ -1331,6 +1366,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "encase_derive_impl"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5dbc65b49ac8078eee25dd0a341e2763974031008518d17b9c448bffc1025541"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.15",
 ]
 
 [[package]]
@@ -1508,7 +1554,7 @@ dependencies = [
  "bytemuck",
  "cfg_aliases",
  "embed-resource",
- "encase",
+ "encase 0.6.0",
  "image",
  "parking_lot",
  "winit",
@@ -1552,6 +1598,12 @@ dependencies = [
  "bytemuck",
  "serde",
 ]
+
+[[package]]
+name = "glam"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad83ab008a4fa3b31dfa713dd41b5a9bdea1e94e4cf1e2fc274ffbd49b0271d3"
 
 [[package]]
 name = "glow"
@@ -1705,7 +1757,7 @@ version = "8.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd41d443f978bfa380a6dad58b62a08c43bcb960631f13e9d015b911eaf73588"
 dependencies = [
- "glam",
+ "glam 0.23.0",
  "once_cell",
 ]
 
