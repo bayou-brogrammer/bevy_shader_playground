@@ -3,12 +3,12 @@ use std::sync::Arc;
 use bevy::{
     input::{mouse::MouseButtonInput, ButtonState},
     prelude::*,
-    render::extract_resource::ExtractResource,
+    render::extract_resource::{ExtractResource, ExtractResourcePlugin},
 };
 use bevy_egui::EguiContexts;
 use parking_lot::Mutex;
 
-use crate::pipeline_assets::{Matter, SandAppSettings};
+use crate::{pipeline_assets::Matter, settings::SandAppSettings};
 
 #[derive(Debug, Resource, Clone, ExtractResource)]
 pub struct AutomataParams {
@@ -29,7 +29,7 @@ impl Default for AutomataParams {
             can_scroll: true,
             is_drawing: false,
             mouse_pos: Vec2::ZERO,
-            use_square_brush: true,
+            use_square_brush: false,
             prev_mouse_pos: Vec2::ZERO,
             selected_matter: Matter::SAND,
             frame: Arc::new(Mutex::new(0)),
@@ -47,6 +47,7 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AutomataParams>()
+            .add_plugin(ExtractResourcePlugin::<AutomataParams>::default())
             .add_system(update_input_state);
     }
 }

@@ -8,7 +8,8 @@ use bevy_fn_plugin::bevy_plugin;
 
 use crate::constants::SIM_SIZE;
 use crate::input::AutomataParams;
-use crate::pipeline_assets::{Matter, SandAppSettings};
+use crate::pipeline_assets::Matter;
+use crate::settings::SandAppSettings;
 
 const SPACING: f32 = 10.0;
 const TEXT_SIZE: f32 = 15.0;

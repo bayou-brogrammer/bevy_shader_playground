@@ -12,24 +12,19 @@ use crate::constants::{
     SIM_SIZE,
 };
 use crate::input::AutomataParams;
-use crate::pipeline_assets::{
-    Matter, SandAppSettings, SandPipelineAssets, SandPiplineImage, SandPushConstants,
-};
+use crate::pipeline_assets::{Matter, SandPipelineAssets, SandPiplineImage, SandPushConstants};
+use crate::settings::SandAppSettings;
 use crate::utils;
 
 // ================================== Assets ================================== //
 
-pub const PIXELS_TARGET_FORMAT: TextureFormat = TextureFormat::Rgba8Unorm;
-
 const PIPELINE_ENTRY: &str = "main";
+pub const PIXELS_TARGET_FORMAT: TextureFormat = TextureFormat::Rgba8Unorm;
 
 pub struct PipelinesPlugin;
 impl Plugin for PipelinesPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SandAppSettings>()
-            .add_plugin(ExtractResourcePlugin::<SandPiplineImage>::default())
-            .add_plugin(ExtractResourcePlugin::<SandAppSettings>::default())
-            .add_plugin(ExtractResourcePlugin::<AutomataParams>::default())
+        app.add_plugin(ExtractResourcePlugin::<SandPiplineImage>::default())
             .add_startup_system(setup_sand_pipeline);
 
         load_internal_asset!(app, SHADER_CORE, "shaders/core.wgsl", Shader::from_wgsl);
@@ -442,13 +437,13 @@ fn queue_bind_groups(
     let sand_view_image = &gpu_images[&sand_image];
     let (buffer_src, buffer_dst) = if *params.frame.lock() % 2 == 0 {
         (
-            &sand_compute_assets.buffer_in,
-            &sand_compute_assets.buffer_out,
+            &sand_compute_assets.matter_in,
+            &sand_compute_assets.matter_out,
         )
     } else {
         (
-            &sand_compute_assets.buffer_out,
-            &sand_compute_assets.buffer_in,
+            &sand_compute_assets.matter_out,
+            &sand_compute_assets.matter_in,
         )
     };
 
