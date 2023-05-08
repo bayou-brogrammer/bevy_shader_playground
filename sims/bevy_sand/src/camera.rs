@@ -1,6 +1,7 @@
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
 
+use crate::constants::{SIM_SIZE, WINDOW_SIZE};
 use crate::input::AutomataParams;
 
 const CAMERA_MOVE_SPEED: f32 = 500.0;
@@ -8,8 +9,20 @@ const CAMERA_MOVE_SPEED: f32 = 500.0;
 pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(camera_controller);
+        app.add_startup_system(setup_camera)
+            .add_system(camera_controller);
     }
+}
+
+pub fn setup_camera(mut commands: Commands) {
+    let mut camera = Camera2dBundle::default();
+
+    let visible_pixels = SIM_SIZE.0;
+    let actual_pixels = WINDOW_SIZE.1;
+    let scale = visible_pixels as f32 / (actual_pixels);
+
+    camera.projection.scale = scale;
+    commands.spawn(camera);
 }
 
 pub fn camera_controller(

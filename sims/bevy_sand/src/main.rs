@@ -4,6 +4,7 @@
 use bevy::prelude::*;
 use bevy::window::{close_on_esc, WindowResolution};
 use bevy::DefaultPlugins;
+use bevy_sand::constants::WINDOW_SIZE;
 
 fn main() {
     App::new()
@@ -12,7 +13,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        resolution: WindowResolution::new(1280., 720.),
+                        resolution: WindowResolution::new(WINDOW_SIZE.0, WINDOW_SIZE.1),
                         canvas: Some("#shader_playground".to_owned()),
                         title: "Shader Playground".to_string(),
                         ..default()

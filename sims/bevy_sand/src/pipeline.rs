@@ -59,7 +59,6 @@ pub fn setup_sand_pipeline(mut commands: Commands, mut images: ResMut<Assets<Ima
         ..default()
     });
 
-    commands.spawn(Camera2dBundle::default());
     commands.insert_resource(SandPiplineImage(image));
 }
 

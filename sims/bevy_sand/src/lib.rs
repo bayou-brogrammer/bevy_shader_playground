@@ -1,5 +1,5 @@
 mod camera;
-mod constants;
+pub mod constants;
 mod input;
 mod pipeline;
 mod pipeline_assets;

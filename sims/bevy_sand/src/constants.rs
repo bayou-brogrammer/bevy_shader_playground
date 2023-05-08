@@ -7,7 +7,8 @@ pub const WORKGROUP_SIZE: u32 = 8;
 pub const GRID_W: u32 = SIM_SIZE.0 / WORKGROUP_SIZE;
 pub const GRID_H: u32 = SIM_SIZE.1 / WORKGROUP_SIZE;
 
-pub const SIM_SIZE: (u32, u32) = (720, 720);
+pub const WINDOW_SIZE: (f32, f32) = (1024., 720.);
+pub const SIM_SIZE: (u32, u32) = (512, 512);
 pub const NUM_OF_CELLS: usize = (SIM_SIZE.0 * SIM_SIZE.1) as usize;
 
 pub const SHADER_CORE: HandleUntyped =

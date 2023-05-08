@@ -3,7 +3,7 @@
 fn vary_color_rgb(color: vec4<f32>, seed_pos: vec2<i32>) -> vec4<f32> {
 	let seed: f32 = 0.1;
 	let p: f32 = rand(seed_pos, seed);
-	let variation: f32 = -0.1 + 0.1 * p;
+	let variation: f32 = -0.1 + 0.2 * p;
     var c = color;
 	c.r = c.r + variation;
 	c.g = c.g + variation;
