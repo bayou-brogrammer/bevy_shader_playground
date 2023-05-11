@@ -181,7 +181,7 @@ impl FromWorld for GameOfLifePipeline {
 
 ```
 
-Our pipeline resource holds the two compute pipeline id's we will be using (init for setup) and (update for each frame). We also need to hold onto
+Our pipeline resource holds the two compute pipeline id's we will be using init (for setup) and update (for each frame). We also need to hold onto
 the bind group layout.
 
 > a bind group layout is a way to describe the structure of resources that a shader will access during execution. The resources include buffers, textures, and samplers
@@ -229,9 +229,9 @@ We then pull the pipeline cache to create our pipelines and pull our shader from
 
 ```rust
     let init_pipeline = pipeline_cache.queue_compute_pipeline(ComputePipelineDescriptor {
-        layout: vec![texture_bind_group_layout.clone()],
-        shader_defs: vec![],
         shader: shader.clone(),
+        shader_defs: vec![],
+        layout: vec![texture_bind_group_layout.clone()],
         entry_point: Cow::from("init"),
         push_constant_ranges: Vec::new(),
         label: Some(std::borrow::Cow::Borrowed("Game of Life Init Pipeline")),
@@ -239,9 +239,9 @@ We then pull the pipeline cache to create our pipelines and pull our shader from
     let update_pipeline = pipeline_cache.queue_compute_pipeline(ComputePipelineDescriptor {
         shader,
         shader_defs: vec![],
+        layout: vec![texture_bind_group_layout.clone()],
         entry_point: Cow::from("update"),
         push_constant_ranges: Vec::new(),
-        layout: vec![texture_bind_group_layout.clone()],
         label: Some(std::borrow::Cow::Borrowed("Game of Life Update Pipeline")),
     });
 
