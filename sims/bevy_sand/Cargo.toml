@@ -1,5 +1,5 @@
 [package]
-authors = ["Jacob LeCoq <lecoqjacob@gmail.com>"]
+authors = ["Jacob LeCoq <n16hth4wkk@gmail.com>"]
 edition = "2021"
 name    = "bevy_sand"
 publish = false

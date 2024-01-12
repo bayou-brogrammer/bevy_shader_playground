@@ -7,8 +7,8 @@ title        = "Bevy Shader Playground"
 
 [output.html]
 # default-theme        = "dark"
-edit-url-template  = "https://github.com/lecoqjacob/bevy_shader_playground/edit/main/docs/{path}"
-git-repository-url = "https://github.com/lecoqjacob/bevy_shader_playground/tree/main/docs"
+edit-url-template  = "https://github.com/n16hth4wkk/bevy_shader_playground/edit/main/docs/{path}"
+git-repository-url = "https://github.com/n16hth4wkk/bevy_shader_playground/tree/main/docs"
 mathjax-support    = true
 # preferred-dark-theme = "ayu"
 
