@@ -1,0 +1,360 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Making cells dance - Bevy Shader Playground</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Exploring Bevy's Game of Life Example</li><li class="chapter-item expanded "><a href="../bevy_gol_example/index.html"><strong aria-hidden="true">1.</strong> Bevy's Game of Life Example</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../bevy_gol_example/part_1.html"><strong aria-hidden="true">1.1.</strong> What are shaders?!</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_2.html"><strong aria-hidden="true">1.2.</strong> Diving deeper into shaders</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_3.html" class="active"><strong aria-hidden="true">1.3.</strong> Making cells dance</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_4.html"><strong aria-hidden="true">1.4.</strong> Paint like Picaso</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_5.html"><strong aria-hidden="true">1.5.</strong> Buffers and UI, Oh My!</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Bevy Shader Playground</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/main/docs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/edit/main/docs/src/bevy_gol_example/part_3.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bevy-game-of-life-shader-example-part-3"><a class="header" href="#bevy-game-of-life-shader-example-part-3">Bevy Game of Life Shader Example Part 3</a></h1>
+<p>It is exciting to finally see some progress after so much boilerplate! Let's change up the color scheme a bit! I like the color red, so let's make the
+alive cells red. In our shader, switch the init_pipeline color to the following:</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn init(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;, @builtin(num_workgroups) num_workgroups: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+
+    let randomNumber = randomFloat(invocation_id.y * num_workgroups.x + invocation_id.x);
+    let alive = randomNumber &gt; 0.9;
+    let color = vec4&lt;f32&gt;(f32(alive), 0.0, 0.0, 1.0); // NEW
+
+    textureStore(texture, location, color);
+}
+</code></pre>
+<p>And you should see something like this:</p>
+<p><img src="images/gol_part3_red.png" alt="Game of life red" /></p>
+<p>Very red! Now onto our update pipeline, which makes all this worth it to see the cells move.</p>
+<h2 id="update-pipeline"><a class="header" href="#update-pipeline">Update Pipeline</a></h2>
+<p>Back in <code>pipeline.rs</code> lets update our match statement within the run function of our node.</p>
+<pre><code class="language-rust">// select the pipeline based on the current state
+match self.state {
+    GameOfLifeState::Loading =&gt; {}
+    GameOfLifeState::Init =&gt; {
+        let init_pipeline = pipeline_cache
+            .get_compute_pipeline(pipeline.init_pipeline)
+            .unwrap();
+        pass.set_pipeline(init_pipeline);
+        pass.dispatch_workgroups(
+            SIM_SIZE.0 / WORKGROUP_SIZE,
+            SIM_SIZE.1 / WORKGROUP_SIZE,
+            1,
+        );
+    }
+    GameOfLifeState::Update =&gt; {
+        let update_pipeline = pipeline_cache
+            .get_compute_pipeline(pipeline.update_pipeline)
+            .unwrap();
+        pass.set_pipeline(update_pipeline);
+        pass.dispatch_workgroups(
+            SIM_SIZE.0 / WORKGROUP_SIZE,
+            SIM_SIZE.1 / WORKGROUP_SIZE,
+            1,
+        );
+    }
+}</code></pre>
+<p>It is exactly the same as the init pipeline, we just use the update pipeline instead. That takes care of the rust side of things, now onto the shader.</p>
+<h2 id="conways-game-of-life"><a class="header" href="#conways-game-of-life">Conway's Game of Life</a></h2>
+<p>The particular bit of cellular automata we are implementing is <code>Conway's Game of Life</code>. The rules are as follows:</p>
+<ol>
+<li>Any live cell with fewer than two live neighbours dies, as if by underpopulation.</li>
+<li>Any live cell with two or three live neighbours lives on to the next generation.</li>
+<li>Any live cell with more than three live neighbours dies, as if by overpopulation.</li>
+<li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+</ol>
+<p>These rules, which compare the behaviour of the automaton to real life, can be condensed into the following:</p>
+<ol>
+<li>Any live cell with two or three live neighbours survives.</li>
+<li>Any dead cell with three live neighbours becomes a live cell.</li>
+<li>All other live cells die in the next generation. Similarly, all other dead cells stay dead.</li>
+</ol>
+<p>Back in our update fn, lets start by pulling the current location</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn update(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+}
+</code></pre>
+<p>Now we need to count the number of alive neighbors, but to do that, we need a way to tell if a cell is alive or dead.
+Add the following utility function</p>
+<pre><code class="language-glsl">...
+fn is_alive(location: vec2&lt;i32&gt;, offset_x: i32, offset_y: i32) -&gt; u32 {
+    let value: vec4&lt;f32&gt; = textureLoad(texture, location + vec2&lt;i32&gt;(offset_x, offset_y));
+    return u32(value.x);
+}
+...
+</code></pre>
+<p>This function takes in a location, and an offset. We store all our data within the texture itself as colors. (in our instance its red colors for alive <br />
+and black for dead). <code>textureLoad</code> loads the color at the given location. We know a cell is alive if the color returned is red, which is a value of 1.0 a <code>x</code></p>
+<p>Now that we have a way to tell if a cell is alive, we can move onto counting the neighbors. We need to check the 8 cells surrounding the current cell.
+We can achieve this using a simple nested for loop. Here is what I came up with:</p>
+<pre><code class="language-glsl">fn count_neighbors_simple(location: vec2&lt;i32&gt;) -&gt; u32 {
+    var result: u32 = 0u;
+    for (var x: i32 = -1; x &lt; 2; x++) {
+        for (var y: i32 = -1; y &lt; 2; y++) {
+            if x == 0 &amp;&amp; y == 0 {
+                continue;
+            }
+
+            result += is_alive(location, x, y); 
+        }
+    }
+    return result;
+}
+</code></pre>
+<p>We take in a location to count the neighbors of, and return the number of alive neighbors by looping through the 8 surrounding cells
+and calling our <code>is_alive</code> function. Lets add this to our update function:</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn update(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+    let is_alive = bool(is_alive(location, 0, 0));
+    let num_neighbors = count_neighbors_simple(location);
+}
+</code></pre>
+<p>It is pretty staight forward from here, we just need to implement the rules from above.</p>
+<pre><code class="language-glsl">...
+
+var result: u32 = 0u;
+
+if (is_alive) { 
+    result = ((u32((num_neighbors) == (2u))) | (u32((num_neighbors) == (3u)))); 
+} else { 
+    result = u32((num_neighbors) == (3u)); 
+}
+
+let color = vec4&lt;f32&gt;(f32(result), 0.0, 0.0, 1.0);
+textureStore(texture, location, color);
+</code></pre>
+<p>If the current cell is alive, we check if it has 2 or 3 neighbors, if it does, it lives on, otherwise it dies. If the current cell is dead,
+we check if it has 3 neighbors, if it does, it becomes alive, otherwise it stays dead. Then we store our result as a color in the texture (red in this case).</p>
+<blockquote>
+<p>Note: I removed the window_fps plugin and <code>FrameTimeDiagnosticsPlugin</code> plugin. It was slowing down my app when running.
+I also disabled <code>bevy::window::PresentMode::AutoNoVsync</code> otherwise, the app runs at like 3k fps XD</p>
+</blockquote>
+<p>Running the app should now show the cells moving around!!! How cool!</p>
+<p><img src="images/gol_running.gif" alt="gol_running" /></p>
+<p>Code can be found on github: <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part3/sims/game_of_life_sim/src">Part 3</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bevy_gol_example/part_2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bevy_gol_example/part_4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bevy_gol_example/part_2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bevy_gol_example/part_4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

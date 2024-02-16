@@ -1,0 +1,502 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Diving deeper into shaders - Bevy Shader Playground</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Exploring Bevy's Game of Life Example</li><li class="chapter-item expanded "><a href="../bevy_gol_example/index.html"><strong aria-hidden="true">1.</strong> Bevy's Game of Life Example</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../bevy_gol_example/part_1.html"><strong aria-hidden="true">1.1.</strong> What are shaders?!</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_2.html" class="active"><strong aria-hidden="true">1.2.</strong> Diving deeper into shaders</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_3.html"><strong aria-hidden="true">1.3.</strong> Making cells dance</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_4.html"><strong aria-hidden="true">1.4.</strong> Paint like Picaso</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_5.html"><strong aria-hidden="true">1.5.</strong> Buffers and UI, Oh My!</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Bevy Shader Playground</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/main/docs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/edit/main/docs/src/bevy_gol_example/part_2.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bevy-game-of-life-shader-example-part-2"><a class="header" href="#bevy-game-of-life-shader-example-part-2">Bevy Game of Life Shader Example Part 2</a></h1>
+<p>Now that we have our pipeline descriptors setup, its time to build the bind group.</p>
+<blockquote>
+<p>A <code>BindGroup</code> is a collection of resources such as buffers, textures, and samplers that are bound together and made available
+to shaders during rendering. Bind groups are created by the application and then bound to a specific pipeline layout,
+which defines the expected bindings for the resources in the group.</p>
+</blockquote>
+<p>At the bottom of our <code>pipeline.rs</code> file, lets add the system which will create our bindgroup each render instance.</p>
+<pre><code class="language-rust">...
+
+#[derive(Resource)]
+struct GameOfLifeImageBindGroup(pub BindGroup);
+
+pub fn queue_bind_group(
+    mut commands: Commands,
+    render_device: Res&lt;RenderDevice&gt;,
+    pipeline: Res&lt;GameOfLifePipeline&gt;,
+    gpu_images: Res&lt;RenderAssets&lt;Image&gt;&gt;,
+    game_of_life_image: Res&lt;GameOfLifeImage&gt;,
+) {
+    let view = &amp;gpu_images[&amp;game_of_life_image.0];
+}</code></pre>
+<!-- more -->
+<p>Starting off we pull in <code>RenderDevice</code> which is used to create all wgpu resources. <code>RenderAssets&lt;Image&gt;</code> is a resource holding all the GPU representations
+of <code>RenderAssets</code> as long as they exist. We use the handle from the image we created as our canvas, to get the <code>GpuImage</code>. Now the bind group:</p>
+<pre><code class="language-rust">...
+let bind_group = render_device.create_bind_group(&amp;BindGroupDescriptor {
+    label: Some("Game of Life Bind Group"),
+    layout: &amp;pipeline.texture_bind_group_layout,
+    entries: &amp;[BindGroupEntry {
+        binding: 0,
+        resource: BindingResource::TextureView(&amp;view.texture_view),
+    }],
+});
+commands.insert_resource(GameOfLifeImageBindGroup(bind_group));</code></pre>
+<p>Well this looks really familiar! It is an exact replica of the bind_group_layout we created earlier. The only difference is that we are now adding
+the actual resources that the layout expects. In this case we are adding the texture view of our canvas image. Lets add the system to our render app.</p>
+<pre><code class="language-rust">...
+let render_app = app.sub_app_mut(RenderApp);
+        render_app
+            .init_resource::&lt;GameOfLifePipeline&gt;()
+            .add_system(pipeline::queue_bind_group.in_set(RenderSet::Queue));</code></pre>
+<p>We add our system to the set <code>RenderSet::Queue</code> which create <code>BindGroups</code> that depend on <code>Prepare</code> data and queue up draw calls to run during the <code>Render</code> step.
+If you try running the app, it will currently crash with the following error:</p>
+<p><code>Resource requested by game_of_life_sim::pipeline::queue_bind_group does not exist: game_of_life_sim::image::GameOfLifeImage</code></p>
+<p>Oops! We forgot to tell bevy render world how to access our Image which exist on the main world. Let's add the <code>ExtractResourcePlugin</code> which just
+extracts the resources into the "render world".</p>
+<pre><code class="language-rust">app.add_plugin(FrameTimeDiagnosticsPlugin::default())
+    // Extract the game of life image resource from the main world into the render world
+    // for operation on by the compute shader and display on the sprite.
+    .add_plugin(ExtractResourcePlugin::&lt;GameOfLifeImage&gt;::default())
+    ...</code></pre>
+<p>If you run again, no errors! Awesome :D. Now onto nodes and the render graph. This was new to me after I setup wgpu manually in my other projects. If you are curious,
+this is the docstring attached to the <code>RenderGraph</code> resource:</p>
+<blockquote>
+<p>The <code>RenderGraph</code> configures the modular, parallel and re-usable render logic. It is a retained and stateless (nodes themselves may have their own
+internal state) structure, which can not be modified while it is executed by the graph runner.
+The <code>RenderGraphRunner</code> is responsible for executing the entire graph each frame. It consists of three main components: Nodes, Edges and Slots.
+<code>Nodes</code> are responsible for generating draw calls and operating on input and output slots. <code>Edges</code> specify the order of execution for nodes and connect input and output slots together.
+<code>Slots</code> describe the render resources created or used by the nodes.
+Additionally a render graph can contain multiple sub graphs, which are run by the corresponding nodes. Every render graph can have its own optional input node.</p>
+</blockquote>
+<p>Essentially we setup a graph to tell the render world how to run our pipelines. We only have a single pipeline currently, so we will only need a single node.</p>
+<p>Our node will have a state for processing which stage the shader is currently in: <code>Loading</code>, <code>Init</code>, <code>Update</code>. Back in <code>pipeline.rs</code> lets add our node:</p>
+<pre><code class="language-rust">...
+pub enum GameOfLifeState {
+    Loading,
+    Init,
+    Update,
+}
+
+pub struct GameOfLifeNode {
+    state: GameOfLifeState,
+}
+
+impl Default for GameOfLifeNode {
+    fn default() -&gt; Self {
+        Self {
+            state: GameOfLifeState::Loading,
+        }
+    }
+}</code></pre>
+<p>Lets add the node to our render app:</p>
+<pre><code class="language-rust">let render_app = app.sub_app_mut(RenderApp);
+render_app
+    .init_resource::&lt;GameOfLifePipeline&gt;()
+    .add_system(pipeline::queue_bind_group.in_set(RenderSet::Queue));
+
+let mut render_graph = render_app.world.resource_mut::&lt;RenderGraph&gt;();
+render_graph.add_node("game_of_life", GameOfLifeNode::default());
+render_graph.add_node_edge(
+    "game_of_life",
+    bevy::render::main_graph::node::CAMERA_DRIVER,
+);</code></pre>
+<p>We add the node to the render graph and then add an edge to the camera driver. This will tell the render graph to run our node before the camera driver.</p>
+<p>Our node starts in the Loading state. We now have to impl bevy's <code>render_graph::Node</code>: The trait is defined as follow:</p>
+<pre><code class="language-rust">pub trait Node: Downcast + Send + Sync + 'static {
+    /// Specifies the required input slots for this node.
+    /// They will then be available during the run method inside the [`RenderGraphContext`].
+    fn input(&amp;self) -&gt; Vec&lt;SlotInfo&gt; {
+        Vec::new()
+    }
+
+    /// Specifies the produced output slots for this node.
+    /// They can then be passed one inside [`RenderGraphContext`] during the run method.
+    fn output(&amp;self) -&gt; Vec&lt;SlotInfo&gt; {
+        Vec::new()
+    }
+
+    /// Updates internal node state using the current render [`World`] prior to the run method.
+    fn update(&amp;mut self, _world: &amp;mut World) {}
+
+    /// Runs the graph node logic, issues draw calls, updates the output slots and
+    /// optionally queues up subgraphs for execution. The graph data, input and output values are
+    /// passed via the [`RenderGraphContext`].
+    fn run(
+        &amp;self,
+        graph: &amp;mut RenderGraphContext,
+        render_context: &amp;mut RenderContext,
+        world: &amp;World,
+    ) -&gt; Result&lt;(), NodeRunError&gt;;
+}</code></pre>
+<p>The <code>input</code> defines required input slots and <code>output</code> defines produced output slots. This will exist on the <code>RenderGraphContext</code>. Our example doesn't
+use either, so we don't care for the graph context.</p>
+<pre><code class="language-rust">impl render_graph::Node for GameOfLifeNode {
+    fn update(&amp;mut self, world: &amp;mut World) {
+        let pipeline = world.resource::&lt;GameOfLifePipeline&gt;();
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+
+        // if the corresponding pipeline has loaded, transition to the next stage
+        match self.state {
+            GameOfLifeState::Loading =&gt; {
+                if let CachedPipelineState::Ok(_) =
+                    pipeline_cache.get_compute_pipeline_state(pipeline.init_pipeline)
+                {
+                    self.state = GameOfLifeState::Init;
+                }
+            }
+            GameOfLifeState::Init =&gt; {
+                if let CachedPipelineState::Ok(_) =
+                    pipeline_cache.get_compute_pipeline_state(pipeline.update_pipeline)
+                {
+                    self.state = GameOfLifeState::Update;
+                }
+            }
+            GameOfLifeState::Update =&gt; {}
+        }
+    }
+
+    fn run(
+        &amp;self,
+        _graph: &amp;mut render_graph::RenderGraphContext,
+        render_context: &amp;mut RenderContext,
+        world: &amp;World,
+    ) -&gt; Result&lt;(), render_graph::NodeRunError&gt; {
+        Ok(())
+    }
+}</code></pre>
+<p>Lets focus on the <code>update</code> method. We are checking if the pipeline has loaded. If it has, we transition to the next stage. For update,
+we have no other state to transition to, but if you needed to recreate your pipeline or rerun your init pipeline, you would do change the state here.</p>
+<p>The fun stuff: <code>run</code>. This is where we will be running our compute shaders. Let's setup the init pipeline first:</p>
+<pre><code class="language-rust">fn run(
+        &amp;self,
+        _graph: &amp;mut render_graph::RenderGraphContext,
+        render_context: &amp;mut RenderContext,
+        world: &amp;World,
+    ) -&gt; Result&lt;(), render_graph::NodeRunError&gt; {
+        let texture_bind_group = &amp;world.resource::&lt;GameOfLifeImageBindGroup&gt;().0;
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+        let pipeline = world.resource::&lt;GameOfLifePipeline&gt;();
+        ...</code></pre>
+<p>We have to pull 3 resources from the world: <code>GameOfLifeImageBindGroup</code>, <code>PipelineCache</code>, and <code>GameOfLifePipeline</code>. We are already familiar
+with the pipeline and pipeline cache, but the new resource <code>GameOfLifeImageBindGroup</code> is a <code>BindGroup</code> that we queue each frame to be used by the shader.
+Now we begin the <code>ComputePass</code>.</p>
+<pre><code class="language-rust">...
+let mut pass = render_context
+    .command_encoder()
+    .begin_compute_pass(&amp;ComputePassDescriptor::default());
+...</code></pre>
+<p>Since we are only using compute shaders, we need to begin a compute pass, the other side of the coin is a render pass for vertex and fragment shaders.</p>
+<pre><code class="language-rust">...
+pass.set_bind_group(0, texture_bind_group, &amp;[]);
+...</code></pre>
+<p>Assign our bindgroup the the compute pass. Then we pull the state defined from our node to see which piplline to execute.</p>
+<pre><code class="language-rust">// select the pipeline based on the current state
+match self.state {
+    GameOfLifeState::Update | GameOfLifeState::Loading =&gt; {}
+    GameOfLifeState::Init =&gt; {
+        let init_pipeline = pipeline_cache
+            .get_compute_pipeline(pipeline.init_pipeline)
+            .unwrap();
+        pass.set_pipeline(init_pipeline);
+        pass.dispatch_workgroups(
+            SIM_SIZE.0 / WORKGROUP_SIZE,
+            SIM_SIZE.1 / WORKGROUP_SIZE,
+            1,
+        );
+    }
+}</code></pre>
+<p>We are skipping the update pipeline currently, but we will come back to it. For the init state, we want to run the init pipeline. We set the pipeline using our
+<code>CachedComputePipelineId</code> defined in our <code>GameOfLifePipeline</code>. Then we dispatch the workgroups. The function takes 3 arguments: <code>x</code>, <code>y</code>, <code>z</code>. In our shader,
+we defined our workgroup size as 8x8x1. <code>@compute @workgroup_size(8, 8, 1)</code></p>
+<p>A visual representation of work groups: <a href="https://github.com/sotrh/learn-wgpu/raw/master/docs/intermediate/tutorial13-terrain/figure_work-groups.jpg">Work Groups</a>.</p>
+<p>It may be helpful to think of a compute shader as a function that is run in a bunch of nested for loops, but each loop is executed in parallel. It would look something like this:</p>
+<pre><code class="language-rust">for wgx in num_workgroups.x:
+    for wgy in num_workgroups.y:
+        for wgz in num_workgroups.z:
+            var local_invocation_id = (wgx, wgy, wgz)
+            for x in workgroup_size.x:
+                for y in workgroup_size.x:
+                    for z in workgroup_size.x:</code></pre>
+<p>Running still produces the same black screen, but I promise the init pipeline triggered once, we just need to add code to our shader now! Bevy uses wgpu internally,
+which uses wgsl as their default shader language. They also support GLSL, but a word of warning, there can be some weird quirks when using GLSL with wgpu.</p>
+<p>To start with our <code>init</code> function in our shader, we see some function inputs:</p>
+<pre><code class="language-glsl">fn init(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;, @builtin(num_workgroups) num_workgroups: vec3&lt;u32&gt;) 
+</code></pre>
+<p>This is a builtin value for the current invocation’s global invocation ID, i.e. its position in the compute shader grid. WGSL has many builtin values
+and functions. Please refer to the spec for more info <a href="https://www.w3.org/TR/WGSL/">WebGPU Shading Language</a>.</p>
+<p>And the <code>num_workgroups</code> is the number of workgroups in each dimension.</p>
+<pre><code class="language-glsl">fn init(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;, @builtin(num_workgroups) num_workgroups: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+}
+</code></pre>
+<p>We can get the current location within the shader by casting the invocation.xy to an i32.</p>
+<blockquote>
+<p>invocation.xy is short hand for invocation.x and invocation.y</p>
+</blockquote>
+<p>We want to randomize our initial state, so lets define a random function.</p>
+<pre><code class="language-glsl">fn hash(value: u32) -&gt; u32 {
+    var state = value;
+    state = state ^ 2747636419u;
+    state = state * 2654435769u;
+    state = state ^ state &gt;&gt; 16u;
+    state = state * 2654435769u;
+    state = state ^ state &gt;&gt; 16u;
+    state = state * 2654435769u;
+    return state;
+}
+
+fn randomFloat(value: u32) -&gt; f32 {
+    return f32(hash(value)) / 4294967295.0;
+}
+</code></pre>
+<p>There are many hash / random functions you can find online. Each with their own pros and cons. I am just using the bevy default.</p>
+<blockquote>
+<p>2654435769u is a inline cast like in rust with 2654435769_u32. The u is for u32.</p>
+</blockquote>
+<pre><code class="language-glsl">let randomNumber = randomFloat(invocation_id.y * num_workgroups.x + invocation_id.x);
+let alive = randomNumber &gt; 0.9;
+</code></pre>
+<p>We generate a random number, and if it is greater than 0.9, we set the cell to alive. We can now set the cell in our texture. Play around with what denotes
+and alive cell. Lowering <code>0.9</code> will generate more alive cells and vice versa. Lets finish off the init.</p>
+<pre><code class="language-glsl">fn init(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;, @builtin(num_workgroups) num_workgroups: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+
+    let randomNumber = randomFloat(invocation_id.y * num_workgroups.x + invocation_id.x);
+    let alive = randomNumber &gt; 0.9;
+    let color = vec4&lt;f32&gt;(f32(alive));
+
+    textureStore(texture, location, color);
+}
+</code></pre>
+<p>You might be curious what <code>vec4&lt;f32&gt;(f32(alive))</code> is doing here. <code>vec4&lt;f32&gt;()</code> is casting the value to a <code>vec4&lt;f32&gt;</code>. We are using the <code>f32()</code> function to cast
+the alive value from a <code>bool</code> to a <code>f32</code>. So if alive the color will be <code>vec4&lt;f32&gt;(1.0)</code> or <code>(1.0,1.0,1.0,1.0)</code> and if dead <code>vec4&lt;f32&gt;(0.0)</code> or <code>(0.0,0.0,0.0,0.0)</code>.</p>
+<p>And now the moment of truth, we can run our code and see the results! Running should produce something like this:</p>
+<p><img src="images/gol_part2.png" alt="Game of life" /></p>
+<p>Code can be found on github: <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part2/sims/game_of_life_sim/src">Part 2</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bevy_gol_example/part_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bevy_gol_example/part_3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bevy_gol_example/part_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bevy_gol_example/part_3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

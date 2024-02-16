@@ -1,0 +1,1263 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Buffers and UI, Oh My! - Bevy Shader Playground</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Exploring Bevy's Game of Life Example</li><li class="chapter-item expanded "><a href="../bevy_gol_example/index.html"><strong aria-hidden="true">1.</strong> Bevy's Game of Life Example</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../bevy_gol_example/part_1.html"><strong aria-hidden="true">1.1.</strong> What are shaders?!</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_2.html"><strong aria-hidden="true">1.2.</strong> Diving deeper into shaders</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_3.html"><strong aria-hidden="true">1.3.</strong> Making cells dance</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_4.html"><strong aria-hidden="true">1.4.</strong> Paint like Picaso</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_5.html" class="active"><strong aria-hidden="true">1.5.</strong> Buffers and UI, Oh My!</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Bevy Shader Playground</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/main/docs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/edit/main/docs/src/bevy_gol_example/part_5.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bevy-game-of-life-shader-example-part-5"><a class="header" href="#bevy-game-of-life-shader-example-part-5">Bevy Game of Life Shader Example Part 5</a></h1>
+<h2 id="square-challenge"><a class="header" href="#square-challenge">Square Challenge</a></h2>
+<details>
+<summary>Spoiler warning</summary>
+<p>In the past tutorial, I challenged you to draw a square instead of a circle. Let's see how your implementation compares to mine.</p>
+<pre><code class="language-glsl">fn draw_particle_square(pos: vec2&lt;f32&gt;, draw_pos: vec2&lt;f32&gt;, size: f32)  {
+    let y_start = draw_pos.y - size / 2.;
+    let y_end = draw_pos.y + size / 2.;
+    let x_start = draw_pos.x - size / 2.;
+    let x_end = draw_pos.x + size / 2.;
+    if (pos.x &gt;= x_start &amp;&amp; pos.x &lt;= x_end &amp;&amp; pos.y &gt;= y_start &amp;&amp; pos.y &lt;= y_end) {
+        textureStore(texture, vec2&lt;i32&gt;(pos), vec4&lt;f32&gt;(1.0, 1.0, 1.0, 1.0));
+    }
+}
+</code></pre>
+</details>
+<h2 id="quick-renames"><a class="header" href="#quick-renames">Quick Renames</a></h2>
+<p>If you previous completed part_4, I changed <code>InputState</code> =&gt; <code>AutomataParams</code>.</p>
+<h2 id="ui"><a class="header" href="#ui">UI</a></h2>
+<p>Before we continue with the graphical side of things, let's add some UI to our game. I prefer to use <a href="https://github.com/emilk/egui">egui</a> in my projects, and there is a wonderful
+integration crate for bevy <a href="https://github.com/mvlabat/bevy_egui">bevy_egui</a>. Let's add it to our project.</p>
+<blockquote>
+<p>$ <code>cargo add bevy_egui</code></p>
+</blockquote>
+<p>Our UI will be pretty simplicstic for now. We will show the base simulation properties, and a couple of overridable properties. We are going to quickly
+add some new properties that we will use.</p>
+<pre><code class="language-rust">pub struct AutomataParams {
+    pub is_paused: bool, // NEW
+    pub is_drawing: bool,
+    pub can_scroll: bool, // NEW
+    pub use_square_brush: bool, // NEW
+
+    pub radius: f32, // NEW
+    pub mouse_pos: Vec2,
+    pub prev_mouse_pos: Vec2,
+}
+
+impl Default for AutomataParams {
+    fn default() -&gt; Self {
+        Self {
+            is_paused: false, // NEW
+            can_scroll: true, // NEW
+            is_drawing: false,
+            use_square_brush: true, // NEW
+
+            radius: 4.0, // NEW
+            mouse_pos: Vec2::ZERO,
+            prev_mouse_pos: Vec2::ZERO,
+        }
+    }
+}</code></pre>
+<p>Now lets build our UI!</p>
+<pre><code class="language-rust">const SPACING: f32 = 10.0;
+const TEXT_SIZE: f32 = 15.0;
+const HEADING_SIZE: f32 = 20.0;
+
+#[bevy_plugin]
+pub fn UIPlugin(app: &amp;mut App) {
+    app.add_plugin(EguiPlugin).add_system(user_interface); // Remember to add the EguiPlugin
+}
+
+/// Give our text a custom size
+fn sized_text(ui: &amp;mut Ui, text: impl Into&lt;String&gt;) {
+    ui.label(
+        egui::RichText::new(text)
+            .size(TEXT_SIZE)
+            .color(egui::Color32::WHITE),
+    );
+}
+
+fn heading(ui: &amp;mut Ui, text: impl Into&lt;String&gt;) {
+    ui.heading(
+        egui::RichText::new(text)
+            .underline()
+            .size(HEADING_SIZE)
+            .color(egui::Color32::WHITE),
+    );
+}</code></pre>
+<p>I am adding a couple of helper methods just to make things easier and reduce the boilerplate I have to write later :D</p>
+<pre><code class="language-rust">/// System to generate user interface with egui
+pub fn user_interface(
+    mut contexts: EguiContexts,
+    mut params: ResMut&lt;AutomataParams&gt;,
+) {
+    egui::Window::new("Automata")
+        .constrain(true)
+        .fixed_pos(egui::pos2(10.0, 10.0))
+        .show(contexts.ctx_mut(), |ui| {
+            ui.visuals_mut().override_text_color = Some(egui::Color32::WHITE);
+
+            heading(ui, "Info");
+            ui.add_space(SPACING);
+
+            sized_text(ui, format!("Grid size: ({},{})", SIM_SIZE.0, SIM_SIZE.1));
+
+            sized_text(
+                ui,
+                (if params.is_paused {
+                    "Paused"
+                } else {
+                    "Simulating"
+                })
+                .to_string(),
+            );
+
+            ui.add_space(SPACING);
+            heading(ui, "Settings");
+            ui.add_space(SPACING);
+
+            ui.checkbox(&amp;mut params.use_square_brush, "Square Brush");
+            ui.add(egui::Slider::new(&amp;mut params.radius, 1.0..=200.0).text("Brush Size"));
+        });
+}
+</code></pre>
+<p>Our <code>Info</code> section will show the size of our grid, and if our simulation is currently running. The <code>Settings</code> section will
+allow us to change the brush size and toggle between a square brush or circular brush.</p>
+<p>Add the plugin to our main plugin, and run the application. This is how it looks:</p>
+<p><img src="images/ui_display_1.png" alt="UI" /></p>
+<p>Let's hookup these properties to our application so we can actually use them!!</p>
+<p>In our <code>update_input_state</code> system, we need to check if Egui is currently being hovered, or capturing the mouse. If so, we need to disable certain inputs
+from happening while the UI is <code>active</code>.</p>
+<pre><code class="language-rust">pub fn update_input_state(
+    mut contexts: EguiContexts,
+    window_query: Query&lt;&amp;Window&gt;,
+    mut params: ResMut&lt;AutomataParams&gt;,
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    camera_q: Query&lt;(&amp;Camera, &amp;GlobalTransform)&gt;,
+    mut mouse_button_input_events: EventReader&lt;MouseButtonInput&gt;,
+) {
+    let Ok(primary_window) = window_query.get_single() else { return };
+    // get the camera info and transform
+    let Ok((camera, camera_transform)) = camera_q.get_single() else { return };
+
+    let ctx = contexts.ctx_mut();
+    if ctx.wants_pointer_input()
+        || ctx.is_pointer_over_area()
+        || ctx.is_using_pointer()
+        || ctx.wants_pointer_input()
+    {
+        // GUI gets priority input
+        params.is_drawing = false;
+        params.can_scroll = false;
+        return;
+    } else {
+        params.can_scroll = true;
+    }
+...</code></pre>
+<p>Essentiall, if the UI is currently using the mouse, we don't want to allow the user to draw on the grid, or scroll the camera.</p>
+<p>Now we can hookup our <code>is_paused</code> property to our simulation. We will do this in the <code>update_simulation</code> system.</p>
+<pre><code class="language-rust">...
+// Pause the simulation
+if keyboard_input.just_pressed(KeyCode::Space) {
+    params.is_paused = !params.is_paused;
+}
+...</code></pre>
+<p>Feel free to use whatever KeyCode you wish, but we just flip the simulation run state when the user presses the spacebar.</p>
+<p>Quickly flipping to our <code>camera_controller</code> system, we can disable scroll events based on our new property.</p>
+<pre><code class="language-rust">pub fn camera_controller(
+    time: Res&lt;Time&gt;,
+    params: Res&lt;AutomataParams&gt;, // NEW
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    mut mouse_wheel_events: EventReader&lt;MouseWheel&gt;,
+    mut query: Query&lt;(&amp;mut Transform, &amp;mut OrthographicProjection), With&lt;Camera&gt;&gt;,
+)
+...
+// =========== Zoom =========== //
+if params.can_scroll { // NEW
+    // zoom code
+}</code></pre>
+<p>In our automata pipeline, we can disable the pipeline if the simulation is paused.</p>
+<pre><code class="language-rust">fn run(
+    &amp;self,
+    _graph: &amp;mut render_graph::RenderGraphContext,
+    render_context: &amp;mut RenderContext,
+    world: &amp;World,
+) -&gt; Result&lt;(), render_graph::NodeRunError&gt; {
+    let is_paused = &amp;world.resource::&lt;AutomataParams&gt;().is_paused;
+
+    if !is_paused {
+        // run the init / update pipelines
+    }
+
+    Ok(())
+}</code></pre>
+<p>And finally, we can use the two new params in our <code>AutomataPushConstants</code> for our <code>draw_pipeline</code>.</p>
+<pre><code class="language-rust">pub struct AutomataPushConstants {
+    draw_start: [f32; 2],
+    draw_end: [f32; 2],
+    draw_radius: f32,
+    draw_square: u32, // NEW
+}
+
+impl AutomataPushConstants {
+    pub fn new(draw_start: Vec2, draw_end: Vec2, draw_radius: f32, draw_square: bool) -&gt; Self {
+        Self {
+            draw_radius,
+            draw_end: draw_end.to_array(),
+            draw_square: draw_square as u32,  // NEW
+            draw_start: draw_start.to_array(),
+        }
+    }
+}
+
+...
+
+let pc = AutomataPushConstants::new(
+    params.mouse_pos,
+    params.prev_mouse_pos,
+    params.radius, // NEW
+    params.use_square_brush, // NEW
+);
+...</code></pre>
+<p>Currently, there is no bool type for <code>push_constants</code> so a <code>u32</code> will have to do.</p>
+<p>To finish up our integrations, we need to fix our <code>draw.wgsl</code> to use the new <code>draw_square</code> property.</p>
+<pre><code class="language-glsl">struct PushConstants {
+    draw_start: vec2&lt;f32&gt;,
+    draw_end: vec2&lt;f32&gt;,
+    draw_radius: f32,
+    draw_square: u32,
+}
+var&lt;push_constant&gt; pc: PushConstants;
+
+...
+
+fn draw_particle_square(pos: vec2&lt;f32&gt;, draw_pos: vec2&lt;f32&gt;, size: f32)  {
+    let y_start = draw_pos.y - size / 2.;
+    let y_end = draw_pos.y + size / 2.;
+    let x_start = draw_pos.x - size / 2.;
+    let x_end = draw_pos.x + size / 2.;
+    if (pos.x &gt;= x_start &amp;&amp; pos.x &lt;= x_end &amp;&amp; pos.y &gt;= y_start &amp;&amp; pos.y &lt;= y_end) {
+        aliveDts[idx(vec2&lt;i32&gt;(pos))] = new_cell(true);
+    }
+}
+
+if (pc.draw_radius &gt; 0.0) {
+    let pos = vec2&lt;f32&gt;(pixel);
+    let point_on_line = closest_point_on_line(pc.draw_start, pc.draw_end, pos);
+
+    // NEW BLOCK
+    if (bool(pc.draw_square)){
+        draw_particle_square(pos, point_on_line, pc.draw_radius);
+    }else{
+        draw_particle_circle(pos, point_on_line, pc.draw_radius);
+    }
+}
+</code></pre>
+<p>Running our simulation now: We can see the UI is working as expected! We can change the radius, and even pause the simulation with <code>Space</code>.</p>
+<p><img src="images/ui_display_2.gif" alt="UI" /></p>
+<p>Whew that was alot, but we have a working UI now! I now want to explore another feature of wgpu, <code>buffers</code>. Currently, we have been storing
+all of our cell data as colors in our texture, but what if we wanted to store more data? We could use different values within the color channels,
+but that would get messy quickly and would also be hard to track, instead we are going to store our cells in <code>buffers</code> and use the buffers to
+paint to the texture.</p>
+<h2 id="buffers"><a class="header" href="#buffers">Buffers</a></h2>
+<blockquote>
+<p>A buffer is a blob of data on the GPU. A buffer is guaranteed to be contiguous, meaning that all the data is stored
+sequentially in memory. Buffers are generally used to store simple things like structs or arrays, but they can store
+more complex stuff such as graph structures like trees (provided all the nodes are stored together and don't reference anything outside of the buffer)</p>
+</blockquote>
+<p>To get started, we are going to add a <code>Uniform</code> buffer for our simulation size, instead of querying the texture each time. This is a pretty simplicstic
+example for a uniform buffer, but it will help us understand the basics.</p>
+<h3 id="uniform-buffers"><a class="header" href="#uniform-buffers">Uniform Buffers</a></h3>
+<blockquote>
+<p>A uniform is a blob of data that is available to every invocation of a set of shaders.
+We've technically already used uniforms for our texture and sampler.
+Uniform buffers are great for small, read only data</p>
+</blockquote>
+<p>Add a helper method to our <code>utils.rs</code> file:</p>
+<pre><code class="language-rust">pub fn create_uniform_buffer&lt;T: bytemuck::Pod + bytemuck::Zeroable&gt;(
+    device: &amp;RenderDevice,
+    data: &amp;[T],
+    label: Option&lt;&amp;str&gt;,
+) -&gt; Buffer {
+    device.create_buffer_with_data(&amp;BufferInitDescriptor {
+        label,
+        contents: bytemuck::cast_slice(data),
+        usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+    })
+}</code></pre>
+<p>We using our handy dandy <code>RenderDevice</code> to create a buffer with initial data. The contents has to be <code>&amp;[u8]</code> so we use bytemuck to cast our data to bytes.
+Notice the buffer usage. <code>UNIFORM</code> because this will be a uniform buffer and <code>COPY_DST</code> allows a buffer to be the destination buffer for
+a <code>CommandEncoder::copy_buffer_to_buffer</code>, <code>CommandEncoder::copy_texture_to_buffer</code>, <code>CommandEncoder::clear_buffer</code> or <code>Queue::write_buffer</code> operation.</p>
+<p>Over in our <code>setup</code> system where we create our image, lets also add our buffers.</p>
+<pre><code class="language-rust">// NEW
+#[derive(Resource, Clone, ExtractResource)]
+pub struct GameOfLifeBuffers {
+    pub uniform_buffer: Buffer,
+}
+
+fn setup(mut commands: Commands, mut images: ResMut&lt;Assets&lt;Image&gt;&gt;, device: Res&lt;RenderDevice&gt;) {
+    ...
+    let uniform_size_buffer = utils::create_uniform_buffer(
+        &amp;device,
+        &amp;[SIM_SIZE.0, SIM_SIZE.1],
+        Some("Simulation Size Uniform"),
+    );
+
+    commands.spawn(Camera2dBundle::default());
+    commands.insert_resource(GameOfLifeImage(image));
+
+    // NEW
+    commands.insert_resource(GameOfLifeBuffers {
+        uniform_buffer: uniform_size_buffer, 
+    });
+}</code></pre>
+<p>Using our helper method, we create a buffer with two <code>u32</code> values: <code>sim_width</code> and <code>sim_height</code> and insert it into our resources.
+As previously where we had to tell our pipeline about the entire layout, we need to add the uniform buffer description as well.</p>
+<p>Remember to add the <code>ExtractResourcePlugin</code> to the main plugin:</p>
+<pre><code class="language-rust">.add_plugin(ExtractResourcePlugin::&lt;GameOfLifeBuffers&gt;::default())</code></pre>
+<p>Starting with <code>AutomataPipeline</code> in the <code>FromWorld</code> implementation:</p>
+<pre><code class="language-rust">.create_bind_group_layout(&amp;BindGroupLayoutDescriptor {
+    label: Some("Game of Life Bind Group Layout"),
+    entries: &amp;[
+        BindGroupLayoutEntry {
+            binding: 0,
+            count: None,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::Buffer {
+                ty: BufferBindingType::Uniform,
+                has_dynamic_offset: false,
+                min_binding_size: BufferSize::new(
+                    (2 * std::mem::size_of::&lt;u32&gt;()) as _,
+                ),
+            },
+        },
+        BindGroupLayoutEntry {
+            binding: 1,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::StorageTexture {
+                access: StorageTextureAccess::ReadWrite,
+                format: TextureFormat::Rgba8Unorm,
+                view_dimension: TextureViewDimension::D2,
+            },
+            count: None,
+        },
+    ],
+});</code></pre>
+<p>We are setting our uniform buffer as the first binding, this is important because changing our layout will have to also be reflected in the <code>BindGroup</code> and
+related shader. The entry type is <code>BufferBindingType::Uniform</code> and we set the <code>min_binding_size</code> to the size of <code>2</code> <code>u32</code> values.</p>
+<p>Then in our <code>bind_group</code> creation:</p>
+<pre><code class="language-rust">let bind_group = render_device.create_bind_group(&amp;BindGroupDescriptor {
+    label: Some("Game of Life Bind Group"),
+    layout: &amp;pipeline.texture_bind_group_layout,
+    entries: &amp;[
+        BindGroupEntry {
+            binding: 0,
+            resource: buffers.uniform_buffer.as_entire_binding(),
+        },
+        BindGroupEntry {
+            binding: 1,
+            resource: BindingResource::TextureView(&amp;view.texture_view),
+        },
+    ],
+});</code></pre>
+<p>Finally we can modify our shader to intake this new layout:</p>
+<pre><code class="language-glsl">// game_of_life.wgsl
+
+@group(0) @binding(0) 
+var&lt;uniform&gt; size : vec2&lt;u32&gt;; // width, height
+@group(0) @binding(1)
+var texture: texture_storage_2d&lt;rgba8unorm, read_write&gt;;
+
+...
+
+fn is_alive(location: vec2&lt;i32&gt;, offset_x: i32, offset_y: i32) -&gt; u32 {
+    var loc = ((location + vec2&lt;i32&gt;(offset_x, offset_y)) + vec2&lt;i32&gt;(size)) % vec2&lt;i32&gt;(size);
+    let value: vec4&lt;f32&gt; = textureLoad(texture, loc);
+    return u32(value.x);
+}
+</code></pre>
+<p>Our uniform is a <code>vec2&lt;u32&gt;</code>, for width/height, and we can now replaced our previous calls with <code>textureDimensions</code> with <code>size</code>.</p>
+<blockquote>
+<p>Challenge: Can you add the uniform buffer to the draw pipeline and use it within the shader?</p>
+</blockquote>
+<details>
+<summary>Challenge Spoiler</summary>
+<p>Adding the uniform to the draw pipeline is exactly the same as the compute pipeline. This is the resulting shader code from the buffer:</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn draw(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;)
+{
+    let pixel = vec2&lt;u32&gt;(invocation_id.xy);
+    if (pixel.x &gt;= size.x &amp;&amp; pixel.y &gt;= size.y) { // NEW
+        return ;
+    }
+
+    if (pc.draw_radius &gt; 0.0) {
+        let pos = vec2&lt;f32&gt;(pixel);
+        let point_on_line = closest_point_on_line(pc.draw_start, pc.draw_end, pos);
+
+        if (bool(pc.draw_square)){
+            draw_particle_square(pos, point_on_line, pc.draw_radius);
+        }else{
+            draw_particle_circle(pos, point_on_line, pc.draw_radius);
+        }
+    }
+}
+</code></pre>
+<p>Review the <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/blob/explore_part5/sims/game_of_life_sim/src/pipeline/draw.rs">source</a> for the full implementation.</p>
+</details>
+<h3 id="storage-buffers"><a class="header" href="#storage-buffers">Storage Buffers</a></h3>
+<blockquote>
+<p>Storage buffers are usually slightly slower than uniform buffers, but they can be much, much bigger. They can be read or written to.
+They are useful for storing large amounts of data that is read or written to by shaders.</p>
+</blockquote>
+<p>We are going to use <code>StorageBuffers</code> to store our cell data. Now before we start creating and hooking up our storage buffer, I want to explain the reasoning
+for switching to a storage buffer. Previously we were using a <code>Texture2d</code> to store our cell data. This was great for single value fields, but I want
+to store more data per cell, specifically, I want to allow for the simulation to have a heat map based on cell state.\</p>
+<pre><code class="language-rust">sturct Cell{
+    alive: u32,
+    heat: f32,
+}</code></pre>
+<p>This will be the struct inside our shader, so lets keep that in mind when creating the buffers. Let's add another helper method to our <code>utils</code> module:</p>
+<pre><code class="language-rust">pub fn create_storage_buffer_with_data&lt;T: bytemuck::Pod + bytemuck::Zeroable&gt;(
+    device: &amp;RenderDevice,
+    data: &amp;[T],
+    label: Option&lt;&amp;str&gt;,
+) -&gt; Buffer {
+    device.create_buffer_with_data(&amp;BufferInitDescriptor {
+        label,
+        contents: bytemuck::cast_slice(data),
+        usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
+    })
+}</code></pre>
+<p>Same as our uniform buffer, but this time we are using <code>BufferUsages::STORAGE</code>.</p>
+<p>Then in our setup:</p>
+<pre><code class="language-rust">#[derive(Resource, Clone, ExtractResource)]
+pub struct GameOfLifeBuffers {
+    pub uniform_buffer: Buffer,
+    pub in_out_buffers: Vec&lt;Buffer&gt;, // NEW
+}
+
+...
+
+// We multiply by 2 because we need to store `alive` and `heat` data for each cell.
+let initial_life_data = vec![0u32; 2 * NUM_OF_CELLS];
+let buffers = (0..2)
+    .map(|i| {
+        utils::create_storage_buffer_with_data(
+            &amp;device,
+            &amp;initial_life_data,
+            Some(&amp;format!("Game of Life Buffer {i}")),
+        )
+    })
+    .collect::&lt;Vec&lt;_&gt;&gt;();
+
+commands.spawn(Camera2dBundle::default());
+commands.insert_resource(GameOfLifeImage(image));
+commands.insert_resource(GameOfLifeBuffers {
+    in_out_buffers: buffers, // NEW!!
+    uniform_buffer: uniform_size_buffer,
+});</code></pre>
+<p>First thing you probably notice is that we are adding two buffers. The reason for this is we are going to use the <code>ping-pong</code> technique to swap between
+buffers. This is a common technique used in graphics programming. We will be using one buffer to read from and one buffer to write to. Then we will
+swap the buffers and repeat.</p>
+<p>You can determine the state of each cell by its neighbors, then write the new state to an output buffer, and repeat each frame
+swapping the output buffer to be the new input. Each pixel calculation can be done independently of each other despite the neighbor relations.
+Or a fractal. These are what you'd call <a href="https://en.wikipedia.org/wiki/Embarrassingly_parallel">embarrassingly parallel</a>. We want that.</p>
+<blockquote>
+<ol>
+<li>Read Buffer Input</li>
+<li>Determine new state</li>
+<li>Write Buffer Output</li>
+<li>Swap Buffer Input and Buffer Output
+Repeat</li>
+</ol>
+</blockquote>
+<p>To flip the input buffer with the ouput buffer, we are going to keep track of a simple frame counter and just modulo it by 2.</p>
+<pre><code class="language-rust">pub struct AutomataParams {
+    pub is_paused: bool,
+    pub is_drawing: bool,
+    pub can_scroll: bool,
+    pub use_square_brush: bool,
+
+    pub radius: f32,
+    pub mouse_pos: Vec2,
+    pub prev_mouse_pos: Vec2,
+    pub frame: Arc&lt;Mutex&lt;usize&gt;&gt;, /// NEW
+}</code></pre>
+<p>Now why an <code>Arc&lt;Mutex&gt;</code>? Because our AutomataParams exist within the main world, and are copied into the render world each frame, we have no way to get
+changes back to the main world, if we manipulated the <code>frame</code> directly. So we are going to use an <code>Arc&lt;Mutex&gt;</code> to share the frame counter between the
+main world and the render world.</p>
+<p>Then again starting with our <code>AutomataPipeline</code>:</p>
+<pre><code class="language-rust">...
+
+const NUM_OF_CELLS: usize = (SIM_SIZE.0 * SIM_SIZE.1) as usize;
+
+...
+
+.create_bind_group_layout(&amp;BindGroupLayoutDescriptor {
+    label: Some("Game of Life Bind Group Layout"),
+    entries: &amp;[
+        BindGroupLayoutEntry {
+            binding: 0,
+            count: None,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::Buffer {
+                ty: BufferBindingType::Uniform,
+                has_dynamic_offset: false,
+                min_binding_size: BufferSize::new(
+                    (2 * std::mem::size_of::&lt;u32&gt;()) as _,
+                ),
+            },
+        },
+        BindGroupLayoutEntry { // NEW
+            binding: 1,
+            count: None,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::Buffer {
+                ty: BufferBindingType::Storage { read_only: false },
+                has_dynamic_offset: false,
+                min_binding_size: BufferSize::new(
+                    (2 * NUM_OF_CELLS * std::mem::size_of::&lt;u32&gt;()) as _,
+                ),
+            },
+        },
+        BindGroupLayoutEntry { // NEW
+            binding: 2,
+            count: None,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::Buffer {
+                ty: BufferBindingType::Storage { read_only: false },
+                has_dynamic_offset: false,
+                min_binding_size: BufferSize::new(
+                    (2 * NUM_OF_CELLS * std::mem::size_of::&lt;u32&gt;()) as _,
+                ),
+            },
+        },
+        BindGroupLayoutEntry {
+            binding: 3,
+            visibility: ShaderStages::COMPUTE,
+            ty: BindingType::StorageTexture {
+                access: StorageTextureAccess::ReadWrite,
+                format: TextureFormat::Rgba8Unorm,
+                view_dimension: TextureViewDimension::D2,
+            },
+            count: None,
+        },
+    ],
+});
+
+...
+
+
+pub fn queue_automata_bind_group(
+    mut commands: Commands,
+    render_device: Res&lt;RenderDevice&gt;,
+
+    params: Res&lt;AutomataParams&gt;,
+    buffers: Res&lt;GameOfLifeBuffers&gt;,
+    game_of_life_image: Res&lt;GameOfLifeImage&gt;,
+
+    pipeline: Res&lt;AutomataPipeline&gt;,
+    gpu_images: Res&lt;RenderAssets&lt;Image&gt;&gt;,
+) {
+    let view = &amp;gpu_images[&amp;game_of_life_image.0];
+
+    // NEW!!!
+    let (buffer_src, buffer_dst) = if *params.frame.lock() % 2 == 0 {
+        (&amp;buffers.in_out_buffers[0], &amp;buffers.in_out_buffers[1])
+    } else {
+        (&amp;buffers.in_out_buffers[1], &amp;buffers.in_out_buffers[0])
+    };
+
+    let bind_group = render_device.create_bind_group(&amp;BindGroupDescriptor {
+        label: Some("Game of Life Bind Group"),
+        layout: &amp;pipeline.texture_bind_group_layout,
+        entries: &amp;[
+            BindGroupEntry {
+                binding: 0,
+                resource: buffers.uniform_buffer.as_entire_binding(),
+            },
+            BindGroupEntry {
+                binding: 1,
+                resource: buffer_src.as_entire_binding(), // NEW
+            },
+            BindGroupEntry {
+                binding: 2,
+                resource: buffer_dst.as_entire_binding(), // NEW
+            },
+            BindGroupEntry {
+                binding: 3,
+                resource: BindingResource::TextureView(&amp;view.texture_view),
+            },
+        ],
+    });
+...</code></pre>
+<p>Our storage type is <code>read_only: false</code> because we are going to be writing to it and our <code>min_binding_size</code> is the size of 2 <code>u32</code> multiplied by
+the number of cells. We use the <code>frame</code> property to swap the buffers each frame so that our input buffer becomes out output buffer and vice versa.</p>
+<p>Now in our <code>AutomataNode</code> implementation, let's update the <code>update</code> fn to update the frame each time:</p>
+<pre><code class="language-rust">fn update(&amp;mut self, world: &amp;mut World) {
+    let pipeline = world.resource::&lt;AutomataPipeline&gt;();
+    let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+
+    // if the corresponding pipeline has loaded, transition to the next stage
+    match self.state {
+        AutomataState::Loading =&gt; {
+            if let CachedPipelineState::Ok(_) =
+                pipeline_cache.get_compute_pipeline_state(pipeline.init_pipeline)
+            {
+                self.state = AutomataState::Init;
+            }
+        }
+        AutomataState::Init =&gt; {
+            if let CachedPipelineState::Ok(_) =
+                pipeline_cache.get_compute_pipeline_state(pipeline.update_pipeline)
+            {
+                self.state = AutomataState::Update;
+            }
+        }
+        AutomataState::Update =&gt; {
+            // NEW!!
+            let params = world.resource_mut::&lt;AutomataParams&gt;();
+            if !params.is_paused {
+                *params.frame.lock() += 1;
+            }
+        }
+    }
+}</code></pre>
+<p>Our shaders are going to start sharing similar properties, so lets create a core shader module to be imported into our main shaders:</p>
+<p>Create a top level folder call <code>shaders</code> and add a file called <code>core.wgsl</code>.</p>
+<pre><code class="language-glsl">#define_import_path bevy_shader_playground::core
+
+struct Cell{
+    alive: u32,
+    heat: u32,
+};
+
+struct PushConstants {
+    draw_start: vec2&lt;f32&gt;,
+    draw_end: vec2&lt;f32&gt;,
+    draw_radius: f32,
+    draw_square: u32,
+}
+var&lt;push_constant&gt; pc: PushConstants;
+
+fn idx(location: vec2&lt;i32&gt;) -&gt; i32 {
+    return location.y * i32(size.x) + location.x;
+}
+
+fn new_cell(alive: bool) -&gt; Cell {
+    return Cell(u32(alive), 0u);
+}
+</code></pre>
+<p>We are moving our push_constants struct into this module and adding a new struct called <code>Cell</code> which will be used to represent our cells in our buffers.
+We are also adding a couple helper functions. The <code>idx</code> function will be used to convert our 2d coordinates into a 1d index since our buffers are 1d arrays.
+The <code>new_cell</code> helps generate new <code>Cells</code> with a zero heat value.</p>
+<p>WebGPU doesn't have the concept of importing other shaders, so this is a bevy specfiic feature. So we need to register our internal shader, so that bevy
+knows how to handle our import maps. In our <code>pipeline.rs</code> file inside our plugin:</p>
+<pre><code class="language-rust">pub const SHADER_CORE: HandleUntyped =
+    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 1371231089456109822);
+
+pub struct PipelinesPlugin;
+impl Plugin for PipelinesPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        load_internal_asset!(app, SHADER_CORE, "shaders/core.wgsl", Shader::from_wgsl);
+...</code></pre>
+<p>Here we are registering our <code>core</code> shader so that we can import it in our main shaders! That wraps up the rust porting,
+now in our <code>game_of_life.wgsl</code> lets add the new layout.</p>
+<pre><code class="language-glsl">#import bevy_shader_playground::core
+
+@group(0) @binding(0) 
+var&lt;uniform&gt; size : vec2&lt;u32&gt;; // width, height
+@group(0) @binding(1) 
+var&lt;storage, read_write&gt; aliveSrc : array&lt;Cell&gt;;
+@group(0) @binding(2) 
+var&lt;storage, read_write&gt; aliveDts : array&lt;Cell&gt;;
+@group(0) @binding(3)
+var texture: texture_storage_2d&lt;rgba8unorm, read_write&gt;;
+
+fn get_cell(location: vec2&lt;i32&gt;) -&gt; Cell {
+    return aliveSrc[idx(location)];
+}
+
+...
+</code></pre>
+<p>We import our core module to get access to the <code>Cell</code> struct. We are adding two new <code>read_write</code> (this matches the bindings!) buffers of <code>Cell</code>.
+I added a <code>get_cell</code> helper function just to cut down on boilerplate a bit. To fix our <code>init</code> function, we just need to replace the <code>textureStore</code> call
+with inserting a new cell into our <code>aliveSrc</code> buffer:</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn init(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;, @builtin(num_workgroups) num_workgroups: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+
+    let randomNumber = randomFloat(invocation_id.y * num_workgroups.x + invocation_id.x);
+    let alive = randomNumber &gt; 0.9;
+    aliveSrc[idx(location)] = new_cell(alive); // NEW!!
+}
+</code></pre>
+<p>Pretty simple! It works just like a normal <code>Vec</code> does in rust with indexing. Let's also update the <code>is_alive</code> function to use our new <code>get_cell</code> helper:</p>
+<pre><code class="language-glsl">fn is_alive(location: vec2&lt;i32&gt;, offset_x: i32, offset_y: i32) -&gt; u32 {
+    var loc = ((location + vec2&lt;i32&gt;(offset_x, offset_y)) + vec2&lt;i32&gt;(size)) % vec2&lt;i32&gt;(size);
+    return aliveSrc[idx(loc)].alive; // NEW!!
+}
+</code></pre>
+<p>Now our update function is going to be a bit more complicated. The heat map will work as follows, an alive cell will have a heat of <code>255</code> and a dead cell,
+will subtract <code>1</code> from its heat each frame. We will color dead cells with the heat value provided, so it will dwindle as they remain dead.</p>
+<pre><code class="language-glsl">@compute @workgroup_size(8, 8, 1)
+fn update(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;) {
+    let location = vec2&lt;i32&gt;(invocation_id.xy);
+    let num_neighbors = count_neighbors_simple(location);
+    var cell = get_cell(location);  // NEW!!
+    let is_alive = bool(cell.alive);  // NEW!!
+
+    var result: u32 = 0u;
+    var heat: u32 = cell.heat; // NEW!!
+
+    if (is_alive) { 
+        result = ((u32((num_neighbors) == (2u))) | (u32((num_neighbors) == (3u)))); 
+    } else { 
+        result = u32((num_neighbors) == (3u)); 
+    }
+
+    var color: vec4&lt;f32&gt; = vec4&lt;f32&gt;(f32(result), 0., 0., 1.);
+    if (bool(result)){
+        heat = 255u;
+    } else {
+        color = vec4&lt;f32&gt;(0., 0., 0., 1.);
+
+        if (heat &gt; 0u){
+            heat -= 1u;
+            color = vec4&lt;f32&gt;(0., 0., f32(heat) / 255., 1.0);
+        }
+    }
+
+    aliveDts[idx(location)] = Cell(result, heat);
+    textureStore(texture, location, color);
+}
+</code></pre>
+<p>So we grab our current cell, and run the same ruleset we did previously with <code>Conway's Game of Life</code>. The new addition is checking if the
+<code>cell</code> is alive or dead. If alive, we set the heat to <code>255</code> and the color will be red. If dead AND heat is greater than <code>0</code> we subtract <code>1</code>
+from the heat, and  color the cell with the heat value in the <code>blue</code> channel. Otherwise, the cell is colored <code>black</code>.</p>
+<p><img src="images/heatmap_no_draw.gif" alt="game_of_life" /></p>
+<p>We lost the ability to draw our cells, but it is a simple fix and a nice challenge!</p>
+<blockquote>
+<p>Challenge-1: Convert the draw pipeline and draw shader to use the new buffers! Hint: We only need 1 buffer to write to in the draw shader.</p>
+</blockquote>
+<blockquote>
+<p>Challenge-2: Create a third pipeline called <code>ColorPipeline</code> that will take in the <code>aliveDts</code> buffer and color the cells based on their heat value instead
+of coloring them within our <code>game_of_life</code> shader.</p>
+</blockquote>
+<details>
+<summary>Challenge Spoiler 1</summary>
+<p>draw.rs</p>
+<pre><code class="language-rust">use bevy::{
+    prelude::*,
+    render::{render_graph, render_resource::*, renderer::*, RenderSet},
+};
+use std::borrow::Cow;
+
+use crate::{input::AutomataParams, NUM_OF_CELLS, SIM_SIZE, WORKGROUP_SIZE};
+
+use super::automata::{AutomataTextureBindGroup, GameOfLifeBuffers};
+
+pub struct AutomataDrawPipelinePlugin;
+impl Plugin for AutomataDrawPipelinePlugin {
+    fn build(&amp;self, render_app: &amp;mut App) {
+        render_app
+            .init_resource::&lt;AutomataDrawPipeline&gt;()
+            .add_system(queue_draw_bind_group.in_set(RenderSet::Queue));
+    }
+}
+
+// ================================== Contants ================================== //
+
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct AutomataPushConstants {
+    draw_start: [f32; 2],
+    draw_end: [f32; 2],
+    draw_radius: f32,
+    draw_square: u32,
+}
+
+impl AutomataPushConstants {
+    pub fn new(draw_start: Vec2, draw_end: Vec2, draw_radius: f32, draw_square: bool) -&gt; Self {
+        Self {
+            draw_radius,
+            draw_end: draw_end.to_array(),
+            draw_square: draw_square as u32,
+            draw_start: draw_start.to_array(),
+        }
+    }
+}
+
+// ================================== Pipeline ================================== //
+
+#[derive(Resource)]
+pub struct AutomataDrawPipeline {
+    draw_pipeline: CachedComputePipelineId,
+    draw_bind_group_layout: BindGroupLayout,
+}
+
+impl FromWorld for AutomataDrawPipeline {
+    fn from_world(world: &amp;mut World) -&gt; Self {
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+
+        let draw_bind_group_layout =
+            world
+                .resource::&lt;RenderDevice&gt;()
+                .create_bind_group_layout(&amp;BindGroupLayoutDescriptor {
+                    label: Some("Game of Life Draw Bind Group Layout"),
+                    entries: &amp;[
+                        BindGroupLayoutEntry {
+                            binding: 0,
+                            count: None,
+                            visibility: ShaderStages::COMPUTE,
+                            ty: BindingType::Buffer {
+                                ty: BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: BufferSize::new(
+                                    (2 * std::mem::size_of::&lt;u32&gt;()) as _,
+                                ),
+                            },
+                        },
+                        BindGroupLayoutEntry {
+                            binding: 1,
+                            count: None,
+                            visibility: ShaderStages::COMPUTE,
+                            ty: BindingType::Buffer {
+                                ty: BufferBindingType::Storage { read_only: false },
+                                has_dynamic_offset: false,
+                                min_binding_size: BufferSize::new(
+                                    (2 * NUM_OF_CELLS * std::mem::size_of::&lt;u32&gt;()) as _,
+                                ),
+                            },
+                        },
+                    ],
+                });
+
+        let brush_shader = world.resource::&lt;AssetServer&gt;().load("shaders/draw.wgsl");
+
+        let draw_pipeline = pipeline_cache.queue_compute_pipeline(ComputePipelineDescriptor {
+            shader: brush_shader,
+            shader_defs: vec![],
+            entry_point: Cow::from("draw"),
+            layout: vec![draw_bind_group_layout.clone()],
+            label: Some(std::borrow::Cow::Borrowed("Game of Life Draw Pipeline")),
+            push_constant_ranges: [PushConstantRange {
+                stages: ShaderStages::COMPUTE,
+                range: 0..std::mem::size_of::&lt;AutomataPushConstants&gt;() as u32,
+            }]
+            .to_vec(),
+        });
+
+        AutomataDrawPipeline {
+            draw_pipeline,
+            draw_bind_group_layout,
+        }
+    }
+}
+
+// ================================== BindGroup ================================== //
+
+#[derive(Resource)]
+struct AutomataDrawBindGroup(pub BindGroup);
+
+pub fn queue_draw_bind_group(
+    mut commands: Commands,
+    render_device: Res&lt;RenderDevice&gt;,
+
+    params: Res&lt;AutomataParams&gt;,
+    buffers: Res&lt;GameOfLifeBuffers&gt;,
+    pipeline: Res&lt;AutomataDrawPipeline&gt;,
+) {
+    let draw_bind_group = render_device.create_bind_group(&amp;BindGroupDescriptor {
+        label: Some("Game of Life Draw Bind Group"),
+        layout: &amp;pipeline.draw_bind_group_layout,
+        entries: &amp;[
+            BindGroupEntry {
+                binding: 0,
+                resource: buffers.uniform_buffer.as_entire_binding(),
+            },
+            BindGroupEntry {
+                binding: 1,
+                resource: buffers.in_out_buffers[*params.frame.lock() % 2].as_entire_binding(),
+            },
+        ],
+    });
+    commands.insert_resource(AutomataDrawBindGroup(draw_bind_group));
+}
+
+// ================================== Nodes ================================== //
+pub enum AutomataDrawState {
+    Loading,
+    Update,
+}
+
+pub struct AutomataDrawNode {
+    state: AutomataDrawState,
+}
+
+impl Default for AutomataDrawNode {
+    fn default() -&gt; Self {
+        Self {
+            state: AutomataDrawState::Loading,
+        }
+    }
+}
+
+impl render_graph::Node for AutomataDrawNode {
+    fn update(&amp;mut self, world: &amp;mut World) {
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+        let pipeline = world.resource::&lt;AutomataDrawPipeline&gt;();
+
+        // if the corresponding pipeline has loaded, transition to the next stage
+        match self.state {
+            AutomataDrawState::Loading =&gt; {
+                if let CachedPipelineState::Ok(_) =
+                    pipeline_cache.get_compute_pipeline_state(pipeline.draw_pipeline)
+                {
+                    self.state = AutomataDrawState::Update;
+                }
+            }
+            AutomataDrawState::Update =&gt; {}
+        }
+    }
+
+    fn run(
+        &amp;self,
+        _graph: &amp;mut render_graph::RenderGraphContext,
+        render_context: &amp;mut RenderContext,
+        world: &amp;World,
+    ) -&gt; Result&lt;(), render_graph::NodeRunError&gt; {
+        let params = &amp;world.resource::&lt;AutomataParams&gt;();
+
+        if params.is_drawing {
+            let texture_bind_group = &amp;world.resource::&lt;AutomataTextureBindGroup&gt;().0;
+            let draw_bind_group = &amp;world.resource::&lt;AutomataDrawBindGroup&gt;().0;
+            let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+            let pipeline = world.resource::&lt;AutomataDrawPipeline&gt;();
+
+            let mut pass = render_context
+                .command_encoder()
+                .begin_compute_pass(&amp;ComputePassDescriptor::default());
+
+            pass.set_bind_group(0, texture_bind_group, &amp;[]);
+
+            // select the pipeline based on the current state
+            match self.state {
+                AutomataDrawState::Loading =&gt; {}
+                AutomataDrawState::Update =&gt; {
+                    let draw_pipeline = pipeline_cache
+                        .get_compute_pipeline(pipeline.draw_pipeline)
+                        .unwrap();
+
+                    let pc = AutomataPushConstants::new(
+                        params.mouse_pos,
+                        params.prev_mouse_pos,
+                        params.radius,
+                        params.use_square_brush,
+                    );
+
+                    pass.set_pipeline(draw_pipeline);
+                    pass.set_bind_group(0, draw_bind_group, &amp;[]);
+                    pass.set_push_constants(0, bytemuck::cast_slice(&amp;[pc]));
+                    pass.dispatch_workgroups(
+                        SIM_SIZE.0 / WORKGROUP_SIZE,
+                        SIM_SIZE.1 / WORKGROUP_SIZE,
+                        1,
+                    );
+                }
+            }
+        }
+
+        Ok(())
+    }
+}</code></pre>
+<p>draw.wgsl</p>
+<pre><code class="language-glsl">#import bevy_shader_playground::core
+
+@group(0) @binding(0) 
+var&lt;uniform&gt; size : vec2&lt;u32&gt;; // width, height
+@group(0) @binding(1) 
+var&lt;storage, read_write&gt; aliveDts : array&lt;Cell&gt;;
+
+// Line v-&gt;w, point p
+// https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+fn closest_point_on_line(v: vec2&lt;f32&gt;, w: vec2&lt;f32&gt;, p: vec2&lt;f32&gt;) -&gt; vec2&lt;f32&gt; {
+    let c = v - w;
+    // length squared
+    let l2 = dot(c, c);
+    if (l2 == 0.0) {
+        return v;
+    }
+    let t = max(0.0, min(1.0, dot(p - v, w - v) / l2));
+    let projection = v + t * (w - v);
+    return projection;
+}
+
+fn draw_particle_circle(pos: vec2&lt;f32&gt;, draw_pos: vec2&lt;f32&gt;, radius: f32) {
+    let y_start = draw_pos.y - radius;
+    let y_end = draw_pos.y + radius;
+    let x_start = draw_pos.x - radius;
+    let x_end = draw_pos.x + radius;
+    if (pos.x &gt;= x_start &amp;&amp; pos.x &lt;= x_end &amp;&amp; pos.y &gt;= y_start &amp;&amp; pos.y &lt;= y_end) {
+        let diff = pos - draw_pos;
+        let dist = length(diff);
+        if (round(dist) &lt;= radius) {
+            aliveDts[idx(vec2&lt;i32&gt;(pos))] = new_cell(true);
+        }
+    }
+}
+
+fn draw_particle_square(pos: vec2&lt;f32&gt;, draw_pos: vec2&lt;f32&gt;, size: f32)  {
+    let y_start = draw_pos.y - size / 2.;
+    let y_end = draw_pos.y + size / 2.;
+    let x_start = draw_pos.x - size / 2.;
+    let x_end = draw_pos.x + size / 2.;
+    if (pos.x &gt;= x_start &amp;&amp; pos.x &lt;= x_end &amp;&amp; pos.y &gt;= y_start &amp;&amp; pos.y &lt;= y_end) {
+        aliveDts[idx(vec2&lt;i32&gt;(pos))] = new_cell(true);
+    }
+}
+
+@compute @workgroup_size(8, 8, 1)
+fn draw(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;)
+{
+    let pixel = vec2&lt;u32&gt;(invocation_id.xy);
+    if (pixel.x &gt;= size.x &amp;&amp; pixel.y &gt;= size.y) {
+        return ;
+    }
+
+    if (pc.draw_radius &gt; 0.0) {
+        let pos = vec2&lt;f32&gt;(pixel);
+        let point_on_line = closest_point_on_line(pc.draw_start, pc.draw_end, pos);
+
+        if (bool(pc.draw_square)){
+            draw_particle_square(pos, point_on_line, pc.draw_radius);
+        }else{
+            draw_particle_circle(pos, point_on_line, pc.draw_radius);
+        }
+    }
+}
+</code></pre>
+<p><img src="images/heatmap_draw.gif" alt="heatmap_draw" /></p>
+</details>
+<p>Challenge 2 along with the full source code can be found on github: <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part5/sims/game_of_life_sim/src">Part 5</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bevy_gol_example/part_4.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bevy_gol_example/part_4.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

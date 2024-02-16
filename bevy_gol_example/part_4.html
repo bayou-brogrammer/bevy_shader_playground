@@ -1,0 +1,775 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Paint like Picaso - Bevy Shader Playground</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Exploring Bevy's Game of Life Example</li><li class="chapter-item expanded "><a href="../bevy_gol_example/index.html"><strong aria-hidden="true">1.</strong> Bevy's Game of Life Example</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../bevy_gol_example/part_1.html"><strong aria-hidden="true">1.1.</strong> What are shaders?!</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_2.html"><strong aria-hidden="true">1.2.</strong> Diving deeper into shaders</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_3.html"><strong aria-hidden="true">1.3.</strong> Making cells dance</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_4.html" class="active"><strong aria-hidden="true">1.4.</strong> Paint like Picaso</a></li><li class="chapter-item expanded "><a href="../bevy_gol_example/part_5.html"><strong aria-hidden="true">1.5.</strong> Buffers and UI, Oh My!</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Bevy Shader Playground</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/main/docs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/edit/main/docs/src/bevy_gol_example/part_4.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bevy-game-of-life-shader-example-part-4"><a class="header" href="#bevy-game-of-life-shader-example-part-4">Bevy Game of Life Shader Example Part 4</a></h1>
+<p>I promised some additions to the original example provided so lets start with the easiest one, a simple camera controller.
+I just want to be able to pan around the simulation and zoom in a bit. I am going to run a cleanup and refactor for readability and
+cleanliness.</p>
+<ul>
+<li>Create three new files, <code>camera.rs</code>, <code>input.rs</code>, and <code>utils.rs</code>, along with the a folder <code>pipeline</code>. It is important the pipeline folder is named exactly
+as the <code>pipeline.rs</code> file as I am not using <code>mod.rs</code> files.</li>
+<li>Move the function <code>create_image</code> into our utils folder and delete the image file.</li>
+<li>Inside <code>pipeline</code> folder create a <code>automata.rs</code> file and move all the pipeline code from our past
+three posts into it. This includes the <code>Pipeline</code>, <code>TextureBindGroup</code>, <code>State</code>, and <code>Node</code>.</li>
+</ul>
+<!-- more -->
+<p>I also renamed some things. Here is a mapping:</p>
+<ul>
+<li><code>Pipeline</code> -&gt; <code>AutomataPipeline</code></li>
+<li><code>GameOfLifeImageBindGroup</code> -&gt; <code>AutomataTextureBindGroup</code></li>
+<li><code>GameOfLifeState</code> -&gt; <code>AutomataState</code></li>
+<li><code>GameOfLifeNode</code> -&gt; <code>AutomataNode</code></li>
+</ul>
+<p>Lets add a simple plugin to host from this file at the top:</p>
+<pre><code class="language-rust">
+#[derive(Resource, Clone, Deref, ExtractResource)]
+pub struct GameOfLifeImage(pub Handle&lt;Image&gt;);
+
+pub struct AutomataPipelinePlugin;
+impl Plugin for AutomataPipelinePlugin {
+    fn build(&amp;self, render_app: &amp;mut App) {
+        render_app
+            .init_resource::&lt;GameOfLifeAutomataPipeline&gt;()
+            .add_system(queue_automata_bind_group.in_set(RenderSet::Queue));
+    }
+}</code></pre>
+<p>Back in the <code>pipeline.rs</code> file, it should be empty, so lets add another plugin to host all pipeline plugins.</p>
+<pre><code class="language-rust">pub struct PipelinesPlugin;
+impl Plugin for PipelinesPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        let render_app = app.sub_app_mut(RenderApp);
+        render_app
+            .add_plugin(automata::AutomataPipelinePlugin);
+
+        let mut render_graph = render_app.world.resource_mut::&lt;RenderGraph&gt;();
+        let gol_id = render_graph.add_node("game_of_life", automata::AutomataNode::default());
+
+        /*
+         * Automata Pipeline =&gt; Camera Driver
+         */
+        render_graph.add_node_edge(gol_id, bevy::render::main_graph::node::CAMERA_DRIVER);
+    }
+}</code></pre>
+<p>We are moving the render_app implementation from our <code>ShaderPlaygroundPlugin</code> to this new <code>PipelinesPlugin</code>.
+Don't forget to add the <code>PipelinesPlugin</code> to the <code>ShaderPlaygroundPlugin</code> in <code>lib.rs</code>!</p>
+<h2 id="camera"><a class="header" href="#camera">Camera</a></h2>
+<p>Onto setting up a camera controller.</p>
+<pre><code class="language-rust">const CAMERA_MOVE_SPEED: f32 = 500.0;
+
+pub struct CameraPlugin;
+impl Plugin for CameraPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        app.add_system(camera_controller);
+    }
+}
+
+fn camera_controller(
+    time: Res&lt;Time&gt;,
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    mut mouse_wheel_events: EventReader&lt;MouseWheel&gt;,
+    mut query: Query&lt;(&amp;mut Transform, &amp;mut OrthographicProjection), With&lt;Camera&gt;&gt;,
+) {
+    for (mut transform, mut ortho) in query.iter_mut() {
+        let up = keyboard_input.pressed(KeyCode::W);
+        let down = keyboard_input.pressed(KeyCode::S);
+        let left = keyboard_input.pressed(KeyCode::A);
+        let right = keyboard_input.pressed(KeyCode::D);
+
+        let x_axis = right as i8 - left as i8;
+        let y_axis = up as i8 - down as i8;
+        let mut move_delta = Vec2::new(x_axis as f32, y_axis as f32);
+
+        // =========== Move the camera around =========== //
+        if move_delta != Vec2::ZERO {
+            move_delta /= move_delta.length();
+
+            let z = transform.translation.z;
+            transform.translation +=
+                move_delta.extend(z) * CAMERA_MOVE_SPEED * time.delta_seconds();
+
+            // Important! We need to restore the Z values when moving the camera around.
+            // Bevy has a specific camera setup and this can mess with how our layers are shown.
+            transform.translation.z = z;
+        }
+
+        // =========== Zoom =========== //
+        for MouseWheel { x, y, unit } in mouse_wheel_events.iter() {
+            let mut x_scroll_diff = 0.0;
+            let mut y_scroll_diff = 0.0;
+
+            match unit {
+                MouseScrollUnit::Line =&gt; {
+                    x_scroll_diff += x;
+                    y_scroll_diff += y;
+                }
+                MouseScrollUnit::Pixel =&gt; {
+                    // I just took this from three-rs, no idea why this magic number was chosen ¯\_(ツ)_/¯
+                    const PIXELS_PER_LINE: f32 = 38.0;
+
+                    y_scroll_diff += y / PIXELS_PER_LINE;
+                    x_scroll_diff += x / PIXELS_PER_LINE;
+                }
+            }
+
+            if x_scroll_diff != 0.0 || y_scroll_diff != 0.0 {
+                if y_scroll_diff &lt; 0.0 {
+                    ortho.scale *= 1.05;
+                } else {
+                    ortho.scale *= 1.0 / 1.05;
+                }
+
+                ortho.scale = ortho.scale.clamp(0.15, 5.);
+            }
+        }
+    }
+}
+...
+
+// in our ShaderPlaygroundPlugin
+
+app
+    // Extract the game of life image resource from the main world into the render world
+    // for operation on by the compute shader and display on the sprite.
+    .add_plugin(ExtractResourcePlugin::&lt;GameOfLifeImage&gt;::default())
+    .add_plugin(camera::CameraPlugin)
+    .add_startup_system(setup);
+...</code></pre>
+<p>A simple camera controller. We generate a move delta based on the pressed keys and then using bevy's builtin time resource, manipulate the
+camera's position for buttery smooth movement. Adjust the movement constant to your liking. The zoom just listens for scroll events and adjusts
+the orthographic projection's scale. The <code>MouseScrollUnit::Pixel</code> case is taken from an online example I found. I don't know what triggers a
+<code>MouseScrollUnit::Pixel</code>, but I have only seen <code>Line</code> units so far, but better safe than sorry!</p>
+<p>To better see that our camera works well, you can replace the <code>ClearColor(Color::BLACK)</code> with <code>ClearColor(Color::WHITE)</code>.
+You should now be able to pan around the simulation and also zoom!</p>
+<p><img src="images/gol_camera.gif" alt="camera" /></p>
+<p>The main thing I want this part to focus on would be drawing onto our canvas. We will be using <em>ANOTHER</em> ;) compute pipeline to handle this for us.
+Lets setup the mouse positioning system that will be used.</p>
+<p>Setting up our input bindings lets fill out <code>input.rs</code> file.</p>
+<p>We need a resource to hold our mouse position, previous mouse position, and if our mouse button is down.</p>
+<pre><code class="language-rust">pub struct InputPlugin;
+impl Plugin for InputPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        app.init_resource::&lt;AutomataParams&gt;();
+    }
+}
+
+#[derive(Default, Resource, ExtractResource, Clone)]
+pub struct AutomataParams {
+    pub mouse_pos: Vec2,
+    pub is_drawing: bool,
+    pub prev_mouse_pos: Vec2,
+}
+
+pub fn update_input_state(
+    window_query: Query&lt;&amp;Window&gt;,
+    mut input_state: ResMut&lt;AutomataParams&gt;,
+    camera_q: Query&lt;(&amp;Camera, &amp;GlobalTransform)&gt;,
+    mut mouse_button_input_events: EventReader&lt;MouseButtonInput&gt;,
+) {
+    let Ok(primary_window) = window_query.get_single() else { return };
+    // get the camera info and transform
+    let Ok((camera, camera_transform)) = camera_q.get_single() else { return };
+
+    // Determine button state
+    for event in mouse_button_input_events.iter() {
+        if event.button == MouseButton::Left {
+            input_state.is_drawing = event.state == ButtonState::Pressed;
+        }
+    }
+    ...
+}</code></pre>
+<p>Mouse button is a simple event reader. The previous and current mouse position is a bit more complicated as we need to convert from world space to canvas space.</p>
+<pre><code class="language-rust">if let Some(world_position) = primary_window
+    .cursor_position()
+    .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+    .map(|ray| ray.origin.truncate())
+{
+}</code></pre>
+<p>Grabbing the world_position from the window and camera is ripped from the <a href="https://bevy-cheatbook.github.io/cookbook/cursor2world.html">bevy cheatbook</a>. Now
+that we have the world coordinates, we need a way to transform them into curstor coordinates. In utils add a function:</p>
+<pre><code class="language-rust">use bevy::prelude::Vec2;
+
+pub fn world_pos_to_canvas_pos(world_pos: Vec2) -&gt; Vec2 {
+    world_pos
+        + Vec2::new(
+            crate::SIM_SIZE.0 as f32 / 2.0,
+            crate::SIM_SIZE.1 as f32 / 2.0,
+        )
+}</code></pre>
+<p>This just takes the world position and adds half the size of the canvas to it. Finish off the input system.</p>
+<pre><code class="language-rust">if let Some(world_position) = primary_window
+    .cursor_position()
+    .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+    .map(|ray| ray.origin.truncate())
+{
+    params.prev_mouse_pos = params.mouse_pos; // NEW
+    params.mouse_pos =
+        crate::utils::world_pos_to_canvas_pos(world_position * Vec2::new(1.0, -1.0)); // NEW
+}</code></pre>
+<p><code>world_position * Vec2::new(1.0, -1.0)</code> is just flipping the y axis since images have y going down and wgpu has y going up.</p>
+<p>Add the input plugin to the <code>ShaderPlaygroundPlugin</code> along with the <code>ExtractResourcePlugin</code></p>
+<pre><code class="language-rust">...
+.add_plugin(ExtractResourcePlugin::&lt;GameOfLifeImage&gt;::default())
+.add_plugin(ExtractResourcePlugin::&lt;AutomataParams&gt;::default())
+.add_plugin(camera::CameraPlugin)
+.add_plugin(input::InputPlugin)
+.add_plugin(pipeline::PipelinesPlugin)
+.add_plugin(ui::UIPlugin)
+.add_startup_system(setup);</code></pre>
+<h2 id="draw-pipeline"><a class="header" href="#draw-pipeline">Draw Pipeline</a></h2>
+<p>We are going to need <code>bytemuck</code> so add that to your project with <code>cargo add bytemuck</code>.</p>
+<p>Add a new file in <code>pipeline</code> folder called draw. This is going to look really similar to the automata setup, just with a few minor tweaks.</p>
+<pre><code class="language-rust">pub struct AutomataDrawPipelinePlugin;
+impl Plugin for AutomataDrawPipelinePlugin {
+    fn build(&amp;self, render_app: &amp;mut App) {
+        render_app
+            .init_resource::&lt;AutomataDrawPipeline&gt;()
+            .add_system(queue_draw_bind_group.in_set(RenderSet::Queue));
+    }
+}
+
+// ================================== Constants ================================== //
+
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct AutomataPushConstants {
+    draw_start: [f32; 2],
+    draw_end: [f32; 2],
+    draw_radius: f32,
+}
+
+impl AutomataPushConstants {
+    pub fn new(draw_start: Vec2, draw_end: Vec2, draw_radius: f32) -&gt; Self {
+        Self {
+            draw_radius,
+            draw_end: draw_end.to_array(),
+            draw_start: draw_start.to_array(),
+        }
+    }
+}</code></pre>
+<p>This new struct holds our push constants that we will pass to our draw pipeline shader.</p>
+<blockquote>
+<p>PushConstants are a way to pass data to a shader without having to create a buffer. The downside is that the data is limited and is much smaller
+than the limit on buffers. The upside is that it is faster than buffers.</p>
+</blockquote>
+<pre><code class="language-rust">
+// ================================== Pipeline ================================== //
+
+#[derive(Resource)]
+pub struct AutomataDrawPipeline {
+    draw_pipeline: CachedComputePipelineId,
+    draw_bind_group_layout: BindGroupLayout,
+}
+
+impl FromWorld for AutomataDrawPipeline {
+    fn from_world(world: &amp;mut World) -&gt; Self {
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+
+        let draw_bind_group_layout =
+            world
+                .resource::&lt;RenderDevice&gt;()
+                .create_bind_group_layout(&amp;BindGroupLayoutDescriptor {
+                    label: Some("Game of Life Bind Group Layout"),
+                    entries: &amp;[BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::StorageTexture {
+                            access: StorageTextureAccess::ReadWrite,
+                            format: TextureFormat::Rgba8Unorm,
+                            view_dimension: TextureViewDimension::D2,
+                        },
+                        count: None,
+                    }],
+                });
+
+        let brush_shader = world.resource::&lt;AssetServer&gt;().load("shaders/draw.wgsl");
+
+        let draw_pipeline = pipeline_cache.queue_compute_pipeline(ComputePipelineDescriptor {
+            shader: brush_shader,
+            shader_defs: vec![],
+            entry_point: Cow::from("draw"),
+            layout: vec![draw_bind_group_layout.clone()],
+            label: Some(std::borrow::Cow::Borrowed("Game of Life Draw Pipeline")),
+            push_constant_ranges: [PushConstantRange {
+                stages: ShaderStages::COMPUTE,
+                range: 0..std::mem::size_of::&lt;AutomataPushConstants&gt;() as u32,
+            }]
+            .to_vec(),
+        });
+
+        AutomataDrawPipeline {
+            draw_pipeline,
+            draw_bind_group_layout,
+        }
+    }
+}</code></pre>
+<p>Our draw_pipeline has a new value: <code>push_constant_ranges</code>. The <code>push_constant_ranges</code> is a range of bytes that can be passed to the shader via <code>PushConstants</code>.</p>
+<pre><code class="language-rust">// ================================== BindGroup ================================== //
+
+#[derive(Resource)]
+struct AutomataDrawBindGroup(pub BindGroup);
+
+pub fn queue_draw_bind_group(
+    mut commands: Commands,
+    render_device: Res&lt;RenderDevice&gt;,
+    pipeline: Res&lt;AutomataDrawPipeline&gt;,
+    gpu_images: Res&lt;RenderAssets&lt;Image&gt;&gt;,
+    game_of_life_image: Res&lt;GameOfLifeImage&gt;,
+) {
+    let view = &amp;gpu_images[&amp;game_of_life_image.0];
+    let draw_bind_group = render_device.create_bind_group(&amp;BindGroupDescriptor {
+        label: Some("Game of Life Draw Bind Group"),
+        layout: &amp;pipeline.draw_bind_group_layout,
+        entries: &amp;[BindGroupEntry {
+            binding: 0,
+            resource: BindingResource::TextureView(&amp;view.texture_view),
+        }],
+    });
+    commands.insert_resource(AutomataDrawBindGroup(draw_bind_group));
+}
+
+// ================================== Nodes ================================== //
+pub enum AutomataDrawState {
+    Loading,
+    Update,
+}
+
+pub struct AutomataDrawNode {
+    state: AutomataDrawState,
+}
+
+impl Default for AutomataDrawNode {
+    fn default() -&gt; Self {
+        Self {
+            state: AutomataDrawState::Loading,
+        }
+    }
+}</code></pre>
+<p>Our node only has two states: Loading and Update as we don't need to initialize anything.</p>
+<pre><code class="language-rust">impl render_graph::Node for AutomataDrawNode {
+    fn update(&amp;mut self, world: &amp;mut World) {
+        let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+        let pipeline = world.resource::&lt;AutomataDrawPipeline&gt;();
+
+        // if the corresponding pipeline has loaded, transition to the next stage
+        match self.state {
+            AutomataDrawState::Loading =&gt; {
+                if let CachedPipelineState::Ok(_) =
+                    pipeline_cache.get_compute_pipeline_state(pipeline.draw_pipeline)
+                {
+                    self.state = AutomataDrawState::Update;
+                }
+            }
+            AutomataDrawState::Update =&gt; {}
+        }
+    }
+
+    fn run(
+        &amp;self,
+        _graph: &amp;mut render_graph::RenderGraphContext,
+        render_context: &amp;mut RenderContext,
+        world: &amp;World,
+    ) -&gt; Result&lt;(), render_graph::NodeRunError&gt; {
+        let params = &amp;world.resource::&lt;AutomataParams&gt;();
+
+        if params.is_drawing {
+            let texture_bind_group = &amp;world.resource::&lt;AutomataTextureBindGroup&gt;().0;
+            let draw_bind_group = &amp;world.resource::&lt;AutomataDrawBindGroup&gt;().0;
+            let pipeline_cache = world.resource::&lt;PipelineCache&gt;();
+            let pipeline = world.resource::&lt;AutomataDrawPipeline&gt;();
+
+            let mut pass = render_context
+                .command_encoder()
+                .begin_compute_pass(&amp;ComputePassDescriptor::default());
+
+            pass.set_bind_group(0, texture_bind_group, &amp;[]);
+
+            // select the pipeline based on the current state
+            match self.state {
+                AutomataDrawState::Loading =&gt; {}
+                AutomataDrawState::Update =&gt; {
+                    let draw_pipeline = pipeline_cache
+                        .get_compute_pipeline(pipeline.draw_pipeline)
+                        .unwrap();
+
+                    let pc =
+                        AutomataPushConstants::new(params.mouse_pos, params.prev_mouse_pos, 10.0);
+
+                    pass.set_pipeline(draw_pipeline);
+                    pass.set_bind_group(0, draw_bind_group, &amp;[]);
+                    pass.set_push_constants(0, bytemuck::cast_slice(&amp;[pc]));
+                    pass.dispatch_workgroups(
+                        SIM_SIZE.0 / WORKGROUP_SIZE,
+                        SIM_SIZE.1 / WORKGROUP_SIZE,
+                        1,
+                    );
+                }
+            }
+        }
+
+        Ok(())
+    }
+}</code></pre>
+<p>Inside our run, we first check to see if we are drawing at all. If so, we pull the current mouse position as well as the previous mouse position and instantiate the <code>AutomataPushConstants</code> with a radius of 10.0.
+We then setup the pipeline and add the push constants with <code>bytemuck::cast_slice</code>.</p>
+<p>With that, our draw pipeline is complete and ready. Lets add it to our pipelines plugin:</p>
+<pre><code class="language-rust">impl Plugin for PipelinesPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        let render_app = app.sub_app_mut(RenderApp);
+        render_app
+            .add_plugin(draw::AutomataDrawPipelinePlugin)
+            .add_plugin(automata::AutomataPipelinePlugin);
+
+        let mut render_graph = render_app.world.resource_mut::&lt;RenderGraph&gt;();
+        let gol_id = render_graph.add_node("game_of_life", automata::AutomataNode::default());
+        let draw_id = render_graph.add_node("game_of_life_draw", draw::AutomataDrawNode::default());
+        ...</code></pre>
+<p>We now have a new node to use in our render graph! We want the <code>draw_node</code> to run  before our <code>automata_node</code>.</p>
+<pre><code class="language-rust">let mut render_graph = render_app.world.resource_mut::&lt;RenderGraph&gt;();
+let gol_id = render_graph.add_node("game_of_life", automata::AutomataNode::default());
+let draw_id = render_graph.add_node("game_of_life_draw", draw::AutomataDrawNode::default());
+
+/*
+* Draw Pipeline =&gt; Automata Pipeline =&gt; Camera Driver
+*/
+render_graph.add_node_edge(draw_id, gol_id);
+render_graph.add_node_edge(gol_id, bevy::render::main_graph::node::CAMERA_DRIVER);</code></pre>
+<p>This creates a new edge from the <code>draw_node</code> to the <code>automata_node</code> and then from the <code>automata_node</code> to the <code>camera_driver</code>! Onto the draw shader!!</p>
+<h2 id="draw-shader"><a class="header" href="#draw-shader">Draw Shader</a></h2>
+<p>create a file called <code>draw.wgsl</code> in our <code>shaders</code> folder and add the following starter code:</p>
+<pre><code class="language-glsl">struct PushConstants {
+    draw_start: vec2&lt;f32&gt;,
+    draw_end: vec2&lt;f32&gt;,
+    draw_radius: f32,
+}
+var&lt;push_constant&gt; pc: PushConstants;
+
+@group(0) @binding(0)
+var texture: texture_storage_2d&lt;rgba8unorm, read_write&gt;;
+
+@compute @workgroup_size(8, 8, 1)
+fn draw(@builtin(global_invocation_id) invocation_id: vec3&lt;u32&gt;)
+{
+    let pixel = vec2&lt;u32&gt;(invocation_id.xy);
+    let size = vec2&lt;u32&gt;(textureDimensions(texture));
+    if (pixel.x &gt;= size.x &amp;&amp; pixel.y &gt;= size.y) {
+        return ;
+    }
+
+    // Draw circle
+    if (pc.draw_radius &gt; 0.0) {
+
+    }
+}
+</code></pre>
+<p>This is all familiar except for the new push_contant and a new function: <code>textureDimensions</code>. The <code>push_contant</code> variable should match what we are passing from
+rust side of things. We are passing in the start and end of the mouse position as well as the radius of the circle we want to draw.</p>
+<p><code>textureDimensions</code> function returns the dimensions of the texture we are sampling from.We use this to check if the current pixel is outside of the texture
+bounds.</p>
+<p>Now we pass in a <code>start</code> and <code>end</code> position, so we need to generate a line between these two points. Searching the web I found the following stackoverflow
+thread with many examples: <a href="https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment">shortest-distance-between-a-point-and-a-line-segment</a></p>
+<pre><code class="language-glsl">// Line v-&gt;w, point p
+// https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+fn closest_point_on_line(v: vec2&lt;f32&gt;, w: vec2&lt;f32&gt;, p: vec2&lt;f32&gt;) -&gt; vec2&lt;f32&gt; {
+    let c = v - w;
+
+    // length squared
+    let l2 = dot(c, c);
+    if (l2 == 0.0) {
+        return v;
+    }
+
+    let t = max(0.0, min(1.0, dot(p - v, w - v) / l2));
+    let projection = v + t * (w - v);
+    return projection;
+}
+</code></pre>
+<blockquote>
+<p>Challenge: Feel free to scower the web for your own implementation and try replacing my implementation with yours!</p>
+</blockquote>
+<p>Using this in our <code>draw</code> function:</p>
+<pre><code class="language-glsl">// Draw circle
+    if (pc.draw_radius &gt; 0.0) {
+        let pos = vec2&lt;f32&gt;(pixel);
+        let point_on_line = closest_point_on_line(pc.draw_start, pc.draw_end, pos);
+    }
+</code></pre>
+<p>We need to cast our <code>pixel</code> variable to an f32 to be used by our <code>closest_point_on_line</code> function. We can now use this point to draw with. Add a new function
+for drawing a circle:</p>
+<pre><code class="language-glsl">fn draw_particle_circle(pos: vec2&lt;f32&gt;, draw_pos: vec2&lt;f32&gt;, radius: f32) {
+    let y_start = draw_pos.y - radius;
+    let y_end = draw_pos.y + radius;
+    let x_start = draw_pos.x - radius;
+    let x_end = draw_pos.x + radius;
+    if (pos.x &gt;= x_start &amp;&amp; pos.x &lt;= x_end &amp;&amp; pos.y &gt;= y_start &amp;&amp; pos.y &lt;= y_end) {
+        let diff = pos - draw_pos;
+        let dist = length(diff);
+        if (round(dist) &lt;= radius) {
+            textureStore(texture, vec2&lt;i32&gt;(pos), vec4&lt;f32&gt;(1.0, 1.0, 1.0, 1.0));
+        }
+    }
+}
+</code></pre>
+<p>This looks pretty similar to how you would draw a circle on the rust side. We create a bounding box based on the radius and make sure our click position
+falls within that box. If it does, we calculate the distance from the click position to the current pixel and if that distance is less than or equal to
+the radius, we store an alive cell at that position. (remember our alive cells are marked by a 1.0 value in the r channel of the pixel color).</p>
+<p>Finish off our shader:</p>
+<pre><code class="language-glsl">// Draw circle
+if (pc.draw_radius &gt; 0.0) {
+    let pos = vec2&lt;f32&gt;(pixel);
+    let point_on_line = closest_point_on_line(pc.draw_start, pc.draw_end, pos);
+    draw_particle_circle(pos, point_on_line, pc.draw_radius);
+}
+</code></pre>
+<h2 id="complete"><a class="header" href="#complete">Complete</a></h2>
+<p>Running the example you should be able to draw on the simulation with your mouse:</p>
+<p><img src="images/gol_4_drawing.gif" alt="drawing" /></p>
+<h2 id="bonus"><a class="header" href="#bonus">Bonus</a></h2>
+<p>One thing you might notice is our simulation doesn't wrap between the edges. We can fix this by manipulating our <code>game_of_life.wgsl</code> slightly.
+In the <code>is_alive</code> function we can add the following:</p>
+<pre><code class="language-glsl">fn is_alive(location: vec2&lt;i32&gt;, offset_x: i32, offset_y: i32) -&gt; u32 {
+    let size = vec2&lt;i32&gt;(textureDimensions(texture));
+    var loc = ((location + vec2&lt;i32&gt;(offset_x, offset_y)) + size) % size;
+    let value: vec4&lt;f32&gt; = textureLoad(texture, loc);
+    return u32(value.x);
+}
+</code></pre>
+<p>I broke out the calculations onto multiple lines for readability. We first get the dimensions of the texture we are sampling from. We then add the offset
+to the current location, add the size to that result and finally mod the result by the size. This will wrap the edges of the texture both x and y.</p>
+<p>With that, our cells will now wrap around the edges of the simulation! Awesome!</p>
+<blockquote>
+<p>Challenge: Create a method to draw a square instead of a circle. For even more complexity, you can add a push_constant bool to pass in
+whether you want to draw a circle or a square.</p>
+</blockquote>
+<p>Code can be found on github: <a href="https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part4/sims/game_of_life_sim/src">Part 4</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bevy_gol_example/part_3.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bevy_gol_example/part_5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bevy_gol_example/part_3.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bevy_gol_example/part_5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
