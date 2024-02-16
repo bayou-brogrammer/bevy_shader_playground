@@ -1,7 +1,7 @@
 [package]
-authors = ["Jacob LeCoq <n16hth4wkk@gmail.com>"]
+authors = ["Jacob LeCoq <bayou-brogrammer@gmail.com>"]
 edition = "2021"
-name    = "game_of_life_sim"
+name = "game_of_life_sim"
 publish = false
 version = "0.1.0"
 
@@ -16,12 +16,12 @@ opt-level = 1
 
 [profile.release]
 codegen-units = 1
-lto           = true
+lto = true
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
 inherits = "release"
-lto      = "thin"
+lto = "thin"
 
 [features]
 dev = ["bevy/bevy_dylib"]
@@ -50,12 +50,12 @@ default = [
 ]
 
 [dependencies]
-bevy           = { version = "0.10", default-features = false }
-bevy_egui      = "0.20"
+bevy = { version = "0.10", default-features = false }
+bevy_egui = "0.20"
 bevy_fn_plugin = { git = "https://github.com/xion/bevy_fn_plugin" }
 
-bytemuck    = "1"
-encase      = { version = "0.6", features = ["glam"] }
+bytemuck = "1"
+encase = { version = "0.6", features = ["glam"] }
 parking_lot = "0.12"
 
 # keep the following in sync with Bevy's dependencies
@@ -63,5 +63,5 @@ image = { version = "0.24", default-features = false }
 winit = { version = "0.28", default-features = false }
 
 [build-dependencies]
-cfg_aliases    = "0.1"
+cfg_aliases = "0.1"
 embed-resource = "2"

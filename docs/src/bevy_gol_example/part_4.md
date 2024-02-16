@@ -632,4 +632,4 @@ With that, our cells will now wrap around the edges of the simulation! Awesome!
 > Challenge: Create a method to draw a square instead of a circle. For even more complexity, you can add a push_constant bool to pass in
 > whether you want to draw a circle or a square.
 
-Code can be found on github: [Part 4](https://github.com/n16hth4wkk/bevy_shader_playground/tree/explore_part4/sims/game_of_life_sim/src)
+Code can be found on github: [Part 4](https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part4/sims/game_of_life_sim/src)

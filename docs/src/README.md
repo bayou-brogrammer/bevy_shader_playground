@@ -25,7 +25,7 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you,
 as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
-You can find the source code on [GitHub](https://github.com/n16hth4wkk/bevy_shader_playground) and issues and feature requests can be posted on
-the [GitHub issue tracker](https://github.com/n16hth4wkk/bevy_shader_playground/issues). Ff you'd like to contribute, please read
-the [CONTRIBUTING](https://github.com/n16hth4wkk/bevy_shader_playground/blob/master/CONTRIBUTING.md) guide and consider opening
-a [pull request](https://github.com/n16hth4wkk/bevy_shader_playground/pulls).
+You can find the source code on [GitHub](https://github.com/bayou-brogrammer/bevy_shader_playground) and issues and feature requests can be posted on
+the [GitHub issue tracker](https://github.com/bayou-brogrammer/bevy_shader_playground/issues). Ff you'd like to contribute, please read
+the [CONTRIBUTING](https://github.com/bayou-brogrammer/bevy_shader_playground/blob/master/CONTRIBUTING.md) guide and consider opening
+a [pull request](https://github.com/bayou-brogrammer/bevy_shader_playground/pulls).

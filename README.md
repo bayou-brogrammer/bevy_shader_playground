@@ -4,7 +4,7 @@ This is a playground to explore and mess with shaders using [Bevy](https://githu
 
 ## Explore Bevy Game of Life Shader
 
-A mini-tutorial series I wrote that can be found [here](https://n16hth4wkk.github.io/bevy-gol-explore-part-1), where I explore how bevy setups up
+A mini-tutorial series I wrote that can be found [here](https://bayou-brogrammer.github.io/bevy-gol-explore-part-1), where I explore how bevy setups up
 compute shaders using their game of life example. I further expand on the example by adding a few new featues:
 
 - Camera Controller

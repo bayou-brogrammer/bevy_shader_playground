@@ -13,4 +13,4 @@ Game of Life simulation:
 Game of Life simulation with drawing:
 ![Game of life drawing](images/gol_4_drawing.gif)
 
-Full source code can be found [here](https://github.com/n16hth4wkk/bevy_shader_playground/tree/main/sims/game_of_life_sim)
+Full source code can be found [here](https://github.com/bayou-brogrammer/bevy_shader_playground/tree/main/sims/game_of_life_sim)

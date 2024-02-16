@@ -344,4 +344,4 @@ And now the moment of truth, we can run our code and see the results! Running sh
 
 ![Game of life](images/gol_part2.png)
 
-Code can be found on github: [Part 2](https://github.com/n16hth4wkk/bevy_shader_playground/tree/explore_part2/sims/game_of_life_sim/src)
+Code can be found on github: [Part 2](https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part2/sims/game_of_life_sim/src)

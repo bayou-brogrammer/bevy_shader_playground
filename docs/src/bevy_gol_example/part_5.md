@@ -479,7 +479,7 @@ fn draw(@builtin(global_invocation_id) invocation_id: vec3<u32>)
 }
 ```
 
-Review the [source](https://github.com/n16hth4wkk/bevy_shader_playground/blob/explore_part5/sims/game_of_life_sim/src/pipeline/draw.rs) for the full implementation.
+Review the [source](https://github.com/bayou-brogrammer/bevy_shader_playground/blob/explore_part5/sims/game_of_life_sim/src/pipeline/draw.rs) for the full implementation.
 
 </details>
 
@@ -1174,7 +1174,7 @@ fn draw(@builtin(global_invocation_id) invocation_id: vec3<u32>)
 
 </details>
 
-Challenge 2 along with the full source code can be found on github: [Part 5](https://github.com/n16hth4wkk/bevy_shader_playground/tree/explore_part5/sims/game_of_life_sim/src)
+Challenge 2 along with the full source code can be found on github: [Part 5](https://github.com/bayou-brogrammer/bevy_shader_playground/tree/explore_part5/sims/game_of_life_sim/src)
 
 [egui]: https://github.com/emilk/egui
 [bevy_egui]: https://github.com/mvlabat/bevy_egui
